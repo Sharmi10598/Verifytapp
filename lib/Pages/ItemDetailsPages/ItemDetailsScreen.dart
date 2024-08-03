@@ -27,7 +27,7 @@ class _ItemDetailsState extends State<ItemDetails> with WidgetsBindingObserver {
   bool itemCodeScan = false;
   bool bincode = false;
 
-  static const platform = MethodChannel('com.example.verifytapp/time');
+  static const platform = MethodChannel('com.buson.verifytapp/time');
   String _networkTimeStatus = 'Unknown';
   Future<void> _openDateTimeSettings() async {
     Get.back();

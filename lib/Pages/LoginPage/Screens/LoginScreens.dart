@@ -36,7 +36,7 @@ class _LoginPageScreensState extends State<LoginPageScreens>
     });
   }
 
-  static const platform = MethodChannel('com.example.verifytapp/time');
+  static const platform = MethodChannel('com.buson.verifytapp/time');
   String _networkTimeStatus = 'Unknown';
   Future<void> _openDateTimeSettings() async {
     Get.back();

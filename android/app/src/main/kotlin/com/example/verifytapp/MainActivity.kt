@@ -1,4 +1,4 @@
-package com.example.verifytapp
+package com.buson.verifytapp
 import android.os.Bundle
 import android.provider.Settings
 import io.flutter.embedding.android.FlutterActivity
@@ -7,7 +7,7 @@ import io.flutter.plugin.common.MethodChannel
 import android.content.Intent
 
 class MainActivity: FlutterActivity() {
-  private val CHANNEL = "com.example.verifytapp/time"
+  private val CHANNEL = "com.buson.verifytapp/time"
   override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
     super.configureFlutterEngine(flutterEngine)
     MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->

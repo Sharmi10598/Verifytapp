@@ -11,7 +11,7 @@ class NetworkTimeCheck extends StatefulWidget {
 
 class _NetworkTimeCheckState extends State<NetworkTimeCheck>
     with WidgetsBindingObserver {
-  static const platform = MethodChannel('com.example.verifytapp/time');
+  static const platform = MethodChannel('com.buson.verifytapp/time');
   String _networkTimeStatus = 'Unknown';
   Future<void> _openDateTimeSettings() async {
     Get.back();
@@ -136,7 +136,7 @@ class _NetworkTimeCheckState extends State<NetworkTimeCheck>
 // class _TimeZoneSettingsPageState extends State<TimeZoneSettingsPage>
 //     with WidgetsBindingObserver {
 //   // static const platform2 =
-//   //     MethodChannel('com.example.verifytapp/openDateTimeSettings');
+//   //     MethodChannel('com.buson.verifytapp/openDateTimeSettings');
 //   // bool _isAutomaticTimeZoneEnabled = false;
 //   // String _currentDateTime = '';
 //   // String _currentTimeZone = '';
@@ -169,7 +169,7 @@ class _NetworkTimeCheckState extends State<NetworkTimeCheck>
 //     await NetworkTimeService.setNetworkTimeEnabled(true);
 //   }
 
-//   static const platform = MethodChannel('com.example.verifytapp/settings');
+//   static const platform = MethodChannel('com.buson.verifytapp/settings');
 
 //   Future<void> _openDateSettings() async {
 //     try {
@@ -274,7 +274,7 @@ class _NetworkTimeCheckState extends State<NetworkTimeCheck>
 // }
 
 // class NetworkTimeService {
-//   static const _channel = MethodChannel('com.example.verifytapp/settings');
+//   static const _channel = MethodChannel('com.buson.verifytapp/settings');
 
 //   static Future<bool> isNetworkTimeEnabled() async {
 //     final bool isEnabled = await _channel.invokeMethod('isNetworkTimeEnabled');

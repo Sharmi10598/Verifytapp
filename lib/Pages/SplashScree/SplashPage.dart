@@ -35,7 +35,7 @@ class SplashScreenpageState extends State<SplashScreenpage>
   String passWord = '';
   bool isLoading = true;
 
-  static const platform = MethodChannel('com.example.verifytapp/time');
+  static const platform = MethodChannel('com.buson.verifytapp/time');
   String _networkTimeStatus = 'Unknown';
   Future<void> _openDateTimeSettings() async {
     Get.back();
