@@ -43,6 +43,13 @@ import 'package:uuid/uuid.dart';
 class AuditCtrlProvider extends ChangeNotifier {
   List<AuditModelList> auditList = [];
   Config config = Config();
+  int? groupValueSelected = 0;
+
+  int? get getgroupValueSelected => groupValueSelected;
+  groupSelectvalue(int i) {
+    groupValueSelected = i;
+    notifyListeners();
+  }
 
   init(BuildContext context, ThemeData theme) async {
     final database = (await AppDatabase.initialize())!;
@@ -188,6 +195,7 @@ class AuditCtrlProvider extends ChangeNotifier {
     completedAuditList = [];
     upcomingtAuditList = [];
     dispAllvalList = [];
+    groupValueSelected = 0;
     resetaudit = false;
     scandata = [];
     getAuditList = [];
@@ -210,6 +218,103 @@ class AuditCtrlProvider extends ChangeNotifier {
     auditList = [];
     scanTime = '';
     dispvalList = [];
+    notifyListeners();
+  }
+
+  checktimediv(BuildContext context, ThemeData theme, String apiRes,
+      String actionName, int docEntry, int indx) {
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (BuildContext context) {
+          return StatefulBuilder(builder: (context, st) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              insetPadding: const EdgeInsets.all(20),
+              contentPadding: EdgeInsets.zero,
+              content: Container(
+                  padding: EdgeInsets.zero,
+                  width: Screens.width(context),
+                  //  height: Screens.bodyheight(context)*0.5,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                  child: Column(mainAxisSize: MainAxisSize.min, children: [
+                    Container(
+                      decoration: BoxDecoration(
+                          color: theme.primaryColor,
+                          borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(8),
+                              topRight: Radius.circular(8))),
+                      width: Screens.width(context),
+                      height: Screens.bodyheight(context) * 0.06,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Container(
+                            width: Screens.width(context) * 0.8,
+                            child: Center(
+                                child: Text("Message",
+                                    style: theme.textTheme.bodyLarge!
+                                        .copyWith(color: Colors.white))),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(
+                      height: Screens.padingHeight(context) * 0.02,
+                    ),
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      child: Text(apiRes),
+                    ),
+                    SizedBox(
+                      height: Screens.padingHeight(context) * 0.02,
+                    ),
+                    Container(
+                      padding: EdgeInsets.only(
+                          bottom: Screens.padingHeight(context) * 0.02),
+                      // width: Screens.width(context) * 0.,
+                      // height: Screens.bodyheight(context) * 0.05,
+                      child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: theme.primaryColor,
+                            // primary: theme.primaryColor,
+                            textStyle: const TextStyle(color: Colors.white),
+                            shape: const RoundedRectangleBorder(
+                                borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(8),
+                              topRight: Radius.circular(8),
+                              bottomLeft: Radius.circular(8),
+                              bottomRight: Radius.circular(8),
+                            )),
+                          ),
+                          onPressed: () async {
+                            Get.back();
+                            String mssgg =
+                                "Already this audit related data are available in memory. Click 'Continue' to proceed with this data or 'Reset' to start a new process.";
+
+                            checkTableEmpty(
+                              context,
+                              theme,
+                              mssgg,
+                              actionName,
+                              docEntry,
+                              indx,
+                            );
+                            notifyListeners();
+                          },
+                          child: const Text(
+                            " OK ",
+                            style: TextStyle(color: Colors.white),
+                          )),
+                    ),
+                  ])),
+            );
+          });
+        });
     notifyListeners();
   }
 
@@ -1107,18 +1212,18 @@ class AuditCtrlProvider extends ChangeNotifier {
             await driftoperation.getallproduct(database);
         List<BinMasterData> getbinresult =
             await driftoperation.getBinMasterdata(database);
-        await callGetAuditApi(context, theme);
         log('headerresult::${getheaderresult.length}::lineresult::${getlineresult.length}:::BinResult::${getbinresult.length}');
         if (getheaderresult.isNotEmpty && getlineresult.isNotEmpty) {
-          openAuditList[indx].isStarting = false;
           await LoadCompleteDataApi.getData(docEntry).then((value) async {
             if (value.stsCode == 200) {
+              await callGetAuditApi(context, theme);
+
               log('Successsssss1111');
               await Get.defaultDialog(
                   title: 'Success',
                   content: Column(
                     children: [
-                      Text('Data downloaded successfully'),
+                      Text('Data downloaded successfully..!!'),
                       ElevatedButton(
                           style: ElevatedButton.styleFrom(
                               shape: RoundedRectangleBorder(
@@ -1126,7 +1231,9 @@ class AuditCtrlProvider extends ChangeNotifier {
                               foregroundColor: Colors.white,
                               backgroundColor: theme.primaryColor),
                           onPressed: () {
+                            openAuditList[indx].isStarting = false;
                             Get.back();
+                            notifyListeners();
                             // context.read<DashBoardCtrlProvider>().selectedIndex =
                             //     1;
                             // Get.offAllNamed(ConstantRoutes.dashboard);
@@ -1336,6 +1443,7 @@ class AuditCtrlProvider extends ChangeNotifier {
     scandata = [];
     checklistdata = [];
     skuCosde = '';
+    groupValueSelected = 0;
     itemCode = '';
     scanTime = '';
     itemName = '';
@@ -1344,6 +1452,8 @@ class AuditCtrlProvider extends ChangeNotifier {
     mycontroller[3].text = '';
     mycontroller[4].text = '';
     mycontroller[5].text = '';
+    mycontroller[6].text = '';
+
     dispvalList = [];
     notifyListeners();
   }
@@ -1619,7 +1729,9 @@ class AuditCtrlProvider extends ChangeNotifier {
         itemCode = '';
         scanTime = '';
         itemName = '';
+        mycontroller[6].text = '';
         serialBatch = '';
+        groupValueSelected = 0;
         dispAllvalList = [];
         selectFirstTapVal();
         notifyListeners();
@@ -1667,9 +1779,12 @@ class AuditCtrlProvider extends ChangeNotifier {
         mycontroller[3].text = '';
         mycontroller[4].text = '';
         mycontroller[5].text = '';
+        mycontroller[6].text = '';
+
         skuCosde = '';
         itemCode = '';
         scanTime = '';
+        groupValueSelected = 0;
         itemName = '';
         serialBatch = '';
         dispAllvalList = [];

@@ -25,7 +25,7 @@ class LoginAPi {
             "tenantId": "${postLoginData.tenentID}", //WareSmart
             "userCode": "${postLoginData.username}", //U003
             "password": "${postLoginData.password}", //SINE90
-            "deviceCode": "${postLoginData.deviceCode}",
+            "deviceCode": "TEST",
             // "${postLoginData.deviceCode}", //HGAFSH88798 or YUTYY7575775
             "devicename": "${postLoginData.devicename}", //SAMSUNG
             "fcmToken": "${postLoginData.fcmToken}",
@@ -34,22 +34,22 @@ class LoginAPi {
             "lattitude": 0,
             "longitude": 0
           }));
-      log("Login Req Body::" +
+      log('josn login::' +
           jsonEncode({
             "tenantId": "${postLoginData.tenentID}", //WareSmart
             "userCode": "${postLoginData.username}", //U003
             "password": "${postLoginData.password}", //SINE90
-            "deviceCode": "${postLoginData.deviceCode}", //HGAFSH88798
+            "deviceCode": "TEST",
+            // "${postLoginData.deviceCode}", //HGAFSH88798 or YUTYY7575775
             "devicename": "${postLoginData.devicename}", //SAMSUNG
             "fcmToken": "${postLoginData.fcmToken}",
             "ip": "",
             "ssid": "",
             "lattitude": 0,
             "longitude": 0
-          }).toString());
-
+          }));
       log("Login sts:::" "${response.statusCode.toString()}");
-      log("Login Res::" "${response.body}");
+      // log("Login Res::" "${response.body}");
 
       resCode = response.statusCode;
       if (response.statusCode == 200) {

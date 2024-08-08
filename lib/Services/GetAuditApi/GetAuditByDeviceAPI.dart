@@ -15,8 +15,8 @@ class GetAuditByDeviceApi {
       log('deviceID.deviceID::${deviceID}');
       log("ConstantValues.token::${ConstantValues.token}");
       final response = await http.get(
-        Uri.parse(Url.queryApi +
-            "WareSmart/v1/GetAuditByDevice?DeviceCode=$deviceID"),
+        Uri.parse(
+            Url.queryApi + "WareSmart/v1/GetAuditByDevice?DeviceCode=TEST"),
         headers: {
           "Content-Type": "application/json",
           "Authorization": 'bearer ' + ConstantValues.token,
@@ -24,7 +24,7 @@ class GetAuditByDeviceApi {
       );
 
       log("GetAudit sts:::" "${response.statusCode.toString()}");
-      // log("AuditByDevice Res:::" "${response.body.toString()}");
+      log("AuditByDevice Res:::" "${response.body.toString()}");
 
       resCode = response.statusCode;
       if (response.statusCode == 200) {

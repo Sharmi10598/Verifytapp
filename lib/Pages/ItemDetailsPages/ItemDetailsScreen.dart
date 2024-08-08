@@ -28,17 +28,10 @@ class ItemDetailsState extends State<ItemDetails> with WidgetsBindingObserver {
   bool itemCodeScan = false;
   bool bincode = false;
   bool disputeval = false;
-  int? groupValueSelected = 0;
   List<bool> isSelected = [
     false,
     false,
   ];
-  int? get getgroupValueSelected => groupValueSelected;
-  groupSelectvalue(int i) {
-    setState(() {
-      groupValueSelected = i;
-    });
-  }
 
   static FocusNode focus1 = FocusNode();
   static FocusNode focus2 = FocusNode();
@@ -763,7 +756,9 @@ class ItemDetailsState extends State<ItemDetails> with WidgetsBindingObserver {
                                 backgroundColor: Colors.grey,
                                 padding: EdgeInsets.all(0),
                                 thumbColor: theme.primaryColor,
-                                groupValue: groupValueSelected,
+                                groupValue: context
+                                    .watch<AuditCtrlProvider>()
+                                    .groupValueSelected,
                                 children: {
                                   0: Container(
                                     alignment: Alignment.center,
@@ -796,7 +791,9 @@ class ItemDetailsState extends State<ItemDetails> with WidgetsBindingObserver {
                                 },
                                 onValueChanged: (v) {
                                   setState(() {
-                                    groupSelectvalue(v!);
+                                    context
+                                        .read<AuditCtrlProvider>()
+                                        .groupSelectvalue(v!);
                                     print(v);
                                   });
                                 },
@@ -817,7 +814,7 @@ class ItemDetailsState extends State<ItemDetails> with WidgetsBindingObserver {
                       SizedBox(
                         height: Screens.bodyheight(context) * 0.01,
                       ),
-                      groupValueSelected == 1
+                      context.watch<AuditCtrlProvider>().groupValueSelected == 1
                           ? Container(
                               // height: Screens.padingHeight(context),
                               color: context

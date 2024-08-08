@@ -558,24 +558,20 @@ class _AuditingOpenScreenState extends State<AuditingOpenScreen> {
                                 context
                                     .read<AuditCtrlProvider>()
                                     .isClickedStart = false;
-                                String mssgg =
-                                    "Already this audit related data are available in memory. Click 'Continue' to proceed with this data or 'Reset' to start a new process.";
-
-                                context
-                                    .read<AuditCtrlProvider>()
-                                    .checkTableEmpty(context, theme, mssgg,
-                                        'Start', docEntry, index);
-                                // String mssgg2 =
-                                //     'This Operation may take few minutes. Closing the application may interrupt the process. \n Do you want to continue ?';
-                                // context
-                                //     .read<AuditCtrlProvider>()
-                                // .actionwarningDialog(context, theme, mssgg2,
-                                //     'Start', docEntry, index);
 
                                 // context
                                 //     .read<AuditCtrlProvider>()
-                                //     .callGetAuditActionApi(context, theme,
+                                //     .checkTableEmpty(context, theme, mssgg,
                                 //         'Start', docEntry, index);
+                                String mssgg =
+                                    "Starting Stock Audits takes some time";
+                                context.read<AuditCtrlProvider>().checktimediv(
+                                    context,
+                                    theme,
+                                    mssgg,
+                                    'Start',
+                                    docEntry,
+                                    index);
                               });
                             },
                             style: ElevatedButton.styleFrom(
@@ -652,13 +648,28 @@ class _AuditingOpenScreenState extends State<AuditingOpenScreen> {
                                         .fetchAuditForDetails
                                         .status ==
                                     'In-Process') {
+                                  context.read<AuditCtrlProvider>().resetaudit =
+                                      true;
                                   context
                                       .read<AuditCtrlProvider>()
-                                      .callGetAuditActionApi(context, theme,
+                                      .isClickedStart = false;
+                                  String mssgg =
+                                      "Starting Stock Audits takes some time";
+                                  context
+                                      .read<AuditCtrlProvider>()
+                                      .checktimediv(context, theme, mssgg,
                                           'Get', docEntry, index);
+                                  // String mssgg =
+                                  //     "Already this audit related data are available in memory. Click 'Continue' to proceed with this data or 'Reset' to start a new process.";
+
                                   // context
                                   //     .read<AuditCtrlProvider>()
-                                  //     .callGetAuditApi(context, theme);
+                                  //     .checkTableEmpty(context, theme, mssgg,
+                                  //         'Get', docEntry, index);
+                                  // context
+                                  //     .read<AuditCtrlProvider>()
+                                  //     .callGetAuditActionApi(context, theme,
+                                  //         'Get', docEntry, index);
                                 }
                               });
                             },
