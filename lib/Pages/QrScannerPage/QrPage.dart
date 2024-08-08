@@ -4,6 +4,8 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:provider/provider.dart';
 import 'package:verifytapp/Controllers/AuditController/AuditControllers.dart';
 
+import '../ItemDetailsPages/ItemDetailsScreen.dart';
+
 class ScannerPage extends StatefulWidget {
   @override
   ScannerPageState createState() => ScannerPageState();
@@ -85,7 +87,7 @@ class ScannerPageState extends State<ScannerPage> {
         .read<AuditCtrlProvider>()
         .afterScanbinCode(context, theme, 'BinCode', binValues);
     bincodeScan = false;
-    context.read<AuditCtrlProvider>().disableKeyBoard(context);
+    // context.read<AuditCtrlProvider>().disableKeyBoard(context);
   }
 
   scanBatchCode(ThemeData theme, String binValues) {

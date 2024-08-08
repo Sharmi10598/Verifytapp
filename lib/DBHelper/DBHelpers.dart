@@ -4,6 +4,8 @@ import 'package:path/path.dart';
 import 'package:verifytapp/DBModel/CheckListDB/CheckListTDB.dart';
 import 'package:verifytapp/DBModel/DispositionListDB/DispositionListTDB.dart';
 import 'package:verifytapp/DBModel/ItemTable/LineDBTable.dart';
+import 'package:verifytapp/DBModel/ScanDataPostDB/PushedChecklistDB.dart';
+import 'package:verifytapp/DBModel/ScanDataPostDB/ScanDataPushedDB.dart';
 import '../DBModel/GetAuditByDevice/GetAuditByDeviceDBModel.dart';
 import '../DBModel/ItemTable/HeaderDataTable.dart';
 import '../DBModel/ScanDataPostDB/ScandatapostTDB.dart';
@@ -146,6 +148,35 @@ class DBHelper {
              ${CheckListDBT.attachurl} varchar ,
              ${CheckListDBT.checklistcode} varchar ,
              ${CheckListDBT.checklistvalue} varchar            
+             )
+        ''');
+    await database.execute('''
+           create table $pushedScanTabled (
+             PSId integer primary key autoincrement,
+             ${PushedScanTableDBT.auditid} integer ,
+             ${PushedScanTableDBT.bincode} varchar ,
+             ${PushedScanTableDBT.itemCode} varchar ,
+             ${PushedScanTableDBT.devicecode} varchar ,
+             ${PushedScanTableDBT.quantity} decimal ,
+             ${PushedScanTableDBT.notes} varchar ,
+             ${PushedScanTableDBT.whscode} varchar ,
+             ${PushedScanTableDBT.ismanual} varchar ,
+             ${PushedScanTableDBT.serialbatch} varchar ,
+             ${PushedScanTableDBT.stockstatus} varchar ,
+             ${PushedScanTableDBT.scandatetime} varchar ,
+             ${PushedScanTableDBT.templateid} varchar,
+              ${PushedScanTableDBT.scanguid} varchar
+             )
+        ''');
+
+    await database.execute('''
+           create table $pushedCklisttdb (
+             
+             PCId integer primary key autoincrement,
+             ${PushedCheckListDBT.auditid} integer ,
+             ${PushedCheckListDBT.attachurl} varchar ,
+             ${PushedCheckListDBT.checklistcode} varchar ,
+             ${PushedCheckListDBT.checklistvalue} varchar            
              )
         ''');
     //DisPositonListTable

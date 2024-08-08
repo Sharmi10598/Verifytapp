@@ -30,7 +30,7 @@ class GetDefaultBinModel {
       var list = jsonDecode(json['data']) as List;
       List<GetBinData> dataList =
           list.map((data) => GetBinData.fromJson(data)).toList();
-      log('Test message11');
+      // log('Test message11');
 
       return GetDefaultBinModel(
           exception: '',

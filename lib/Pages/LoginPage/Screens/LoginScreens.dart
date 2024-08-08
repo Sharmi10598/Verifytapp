@@ -78,6 +78,7 @@ class _LoginPageScreensState extends State<LoginPageScreens>
         // );
       } else if (_networkTimeStatus == 'Disabled') {
         showDialog(
+            barrierDismissible: false,
             context: context,
             builder: (context) {
               return AlertDialog(

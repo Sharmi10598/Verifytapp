@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 import 'package:verifytapp/Constant/ConstantRoutes.dart';
 import 'package:verifytapp/Constant/Screen.dart';
@@ -10,6 +11,7 @@ import 'package:verifytapp/Pages/LoginPage/Screens/LoginScreens.dart';
 import '../../Constant/Configuration.dart';
 import '../../Constant/ConstantSapValues.dart';
 import '../../Constant/Helper.dart';
+import '../../Constant/LocalUrl/GetLocalUrl.dart';
 import '../../Model/LoginModel/loginmodel.dart';
 import '../../Services/LoginAPI/loginApi.dart';
 
@@ -25,7 +27,7 @@ class SplashScreenpageState extends State<SplashScreenpage>
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
+    // WidgetsBinding.instance.addObserver(this);
     callTimeEnableMethod();
   }
 
@@ -57,13 +59,14 @@ class SplashScreenpageState extends State<SplashScreenpage>
     }
   }
 
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
+  // @override
+  // void dispose() {
+  //   WidgetsBinding.instance.removeObserver(this);
 
-    super.dispose();
-  }
+  //   super.dispose();
+  // }
 
+  Config configg = Config();
   Future<void> _checkAutomaticTimeZoneSetting() async {
     bool isAutomatic;
     String networkTimeStatuss = '';
@@ -74,7 +77,14 @@ class SplashScreenpageState extends State<SplashScreenpage>
       _networkTimeStatus = networkTimeStatuss;
 
       if (_networkTimeStatus == 'Enabled') {
-        await checkLoginPage();
+        checkLoginPage();
+        // bool? isNoNetwork = await configg.haveNoInterNet();
+        // if (isNoNetwork == true) {
+        //   validateMethod(context);
+        // } else {
+        //   checkLoginPage();
+        // }
+
         // ScaffoldMessenger.of(context).showSnackBar(
         //   const SnackBar(
         //     content: Text('Automatic time zone is already enabled.'),
@@ -83,6 +93,7 @@ class SplashScreenpageState extends State<SplashScreenpage>
         // );
       } else if (_networkTimeStatus == 'Disabled') {
         showDialog(
+            barrierDismissible: false,
             context: context,
             builder: (context) {
               return AlertDialog(
@@ -102,18 +113,6 @@ class SplashScreenpageState extends State<SplashScreenpage>
     } on PlatformException catch (e) {
       isAutomatic = false;
     }
-    // setState(() {
-    //   _isAutomaticTimeZoneEnabled = isAutomatic;
-    // if (_isAutomaticTimeZoneEnabled) {
-    //   // _updateCurrentDateTime();
-    //   ScaffoldMessenger.of(context).showSnackBar(
-    //     const SnackBar(
-    //       content: Text('Automatic time zone is already enabled.'),
-    //       duration: Duration(seconds: 2),
-    //     ),
-    //   );
-    // }
-    // });
   }
 
   callTimeEnableMethod() {
@@ -122,14 +121,34 @@ class SplashScreenpageState extends State<SplashScreenpage>
     _checkAutomaticTimeZoneSetting();
   }
 
+  setURL() async {
+    String? getCustUrl = await HelperFunctions.getHostDSP();
+    String? getStockUrl = await HelperFunctions.getStockHostDSP();
+
+    log('getStockUrlget:$getCustUrl');
+    String hostip = '';
+    if (getCustUrl != null) {
+      for (int i = 0; i < getCustUrl.length; i++) {
+        if (getCustUrl[i] == ":") {
+          break;
+        }
+        // log("for ${hostip}");
+        hostip = hostip + getCustUrl[i];
+      }
+    }
+    // HelperFunctions.saveHostSP(hostip);
+    Url.queryApi = "${getCustUrl.toString()}/api/";
+    Url.stockSnapApi = "${getStockUrl.toString()}/api/";
+    log('Url.queryApi Url.queryApi222::${Url.queryApi}:::stockSnapApi::${Url.stockSnapApi}');
+  }
+
   validateMethod(BuildContext context) async {
     PostLoginData postLoginData = PostLoginData();
-
     String? fcm2 = await HelperFunctions.getFCMTokenSharedPreference();
     if (fcm2 == null) {
       fcm2 = "HGHJGFGHGGFD897657JKGJH";
       // fcm2 = (await getToken())!;
-      print("FCM Token: $fcm2");
+      // print("FCM Token: $fcm2");
       await HelperFunctions.saveFCMTokenSharedPreference(fcm2);
     }
     String? deviceID = await HelperFunctions.getDeviceIDSharedPreference();
@@ -155,26 +174,25 @@ class SplashScreenpageState extends State<SplashScreenpage>
     postLoginData.devicename = '$brand $model';
     ConstantValues.tenentID =
         await HelperFunctions.getTenetIDSharedPreference();
-
+    log('DDDDDDDDDDDDD:::${Url.queryApi}');
     await LoginAPi.getData(postLoginData).then((value) async {
       if (value.resCode! >= 200 && value.resCode! <= 200) {
         await HelperFunctions.saveTokenSharedPreference(value.token!);
         ConstantValues.token = value.token!;
         await HelperFunctions.savewhseCode(value.whsCode!);
         String? whsCode = await HelperFunctions.getWhsCode();
-        log('whsCodewhsCodewhsCodewhsCode::::$whsCode');
+        // log('whsCodewhsCodewhsCodewhsCode::::$whsCode');
         await HelperFunctions.saveUserLoggedInSharedPreference(true);
+
         Get.offAllNamed(ConstantRoutes.dashboard);
 
         log("message");
       } else if (value.resCode! >= 400 && value.resCode! <= 410) {
-        log('value.respDescvalue.respDesc::${value.respDesc}');
+        // log('value.respDescvalue.respDesc::${value.respDesc}');
         userName = '';
         passWord = '';
-        LoginController.errorMsh = value.respDesc.toString();
-        Navigator.push(context,
-            MaterialPageRoute(builder: (context) => const LoginPageScreens()));
-        // errorMsh = 'Check your Internet Connection...!!';
+
+        Get.offAllNamed(ConstantRoutes.login);
       }
     });
   }
@@ -189,11 +207,15 @@ class SplashScreenpageState extends State<SplashScreenpage>
     Future.delayed(const Duration(seconds: 3), () async {
       isLoading = false;
       if (userName.isNotEmpty && passWord.isNotEmpty) {
-        // ConstantValues.token =
-        //     (await HelperFunctions.getTokenSharedPreference())!;
-        // Navigator.push(context,
-        //     MaterialPageRoute(builder: (context) => DashboardScreens()));
-        await validateMethod(context);
+        bool? isNoNetwork = await configg.haveNoInterNet();
+        if (isNoNetwork == false) {
+          await setURL();
+          log('XXXXXXXXXX');
+          validateMethod(context);
+        } else {
+          log('YYYYYYYYYYYYY');
+          Get.offAllNamed(ConstantRoutes.dashboard);
+        }
       } else {
         setState(() {
           log('message1111');
@@ -207,21 +229,21 @@ class SplashScreenpageState extends State<SplashScreenpage>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       body: Container(
+        padding: EdgeInsets.only(
+            left: Screens.padingHeight(context) * 0.03,
+            right: Screens.padingHeight(context) * 0.03),
         decoration: const BoxDecoration(
-            color: Colors.black,
-            image: DecorationImage(
-                fit: BoxFit.fill,
-                image: AssetImage('assets/DesignerSplash.png'))),
+            shape: BoxShape.circle,
+            image:
+                DecorationImage(image: AssetImage('assets/appiconlaunch.png'))),
         height: Screens.fullHeight(context),
         width: Screens.width(context),
-        child: Container(
-          child: const Center(
-            child: CircularProgressIndicator(
-              color: Colors.white,
-            ),
-          ),
+        child: SpinKitThreeBounce(
+          size: Screens.padingHeight(context) * 0.04,
+          color: Colors.black,
         ),
         // child: const Image(image: AssetImage('assets/Designer.png')),
       ),

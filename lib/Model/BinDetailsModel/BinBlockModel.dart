@@ -19,13 +19,13 @@ class AuditBinBlockModel {
       Map<String, dynamic> json, int statuzCode) {
     // Map<String, dynamic>
     if (statuzCode >= 200 && statuzCode <= 210) {
+      // List<AuditBinBlockDataModel> dataList = [];
       // if (json['data'] != null) {
-      log('message::${jsonDecode(json['data'])}');
-      var list = jsonDecode(json['data']) as List;
-      // List<AuditBinBlockDataModel> dataList =
-      //     list.map((data) => AuditBinBlockDataModel.fromJson(data)).toList();
-      log('Test message11');
-
+      //   log('message::${jsonDecode(json['data'])}');
+      //   var list = jsonDecode(json['data']) as List;
+      //   List<AuditBinBlockDataModel> dataList =
+      //       list.map((data) => AuditBinBlockDataModel.fromJson(data)).toList();
+      // }
       return AuditBinBlockModel(
           exception: '',
           respCode: json['respCode'],

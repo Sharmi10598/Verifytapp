@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'package:http/http.dart' as http;
 import '../../Constant/ConstantSapValues.dart';
+import '../../Constant/LocalUrl/GetLocalUrl.dart';
 import '../../Model/AuditModel/AuditActionModel.dart';
 import '../../Model/AuditModel/AuditCancelModel.dart';
 
@@ -12,11 +13,11 @@ class GetAuditCancelApi {
     int resCode = 500;
 
     try {
-      log('ConstantValues.token::${ConstantValues.token}');
-      log('http://91.203.133.224:92/api/WareSmart/v1/Pos6AuditCancel/$docEntry/$reason');
+      // log('ConstantValues.token::${ConstantValues.token}');
+      log(Url.queryApi + 'WareSmart/v1/Pos6AuditCancel/$docEntry/$reason');
       final response = await http.post(
-        Uri.parse(
-            'http://91.203.133.224:92/api/WareSmart/v1/PoseAuditCancel/$docEntry/$reason'),
+        Uri.parse(Url.queryApi +
+            'api/WareSmart/v1/PoseAuditCancel/$docEntry/$reason'),
         headers: {
           "accept": "/",
           "Authorization": 'bearer ' + ConstantValues.token,
@@ -24,7 +25,7 @@ class GetAuditCancelApi {
       );
 
       log("AuditCancel sts:::${response.statusCode.toString()}");
-      log("AuditCancel Res:::${response.body.toString()}");
+      // log("AuditCancel Res:::${response.body.toString()}");
 
       resCode = response.statusCode;
       if (response.statusCode == 200) {

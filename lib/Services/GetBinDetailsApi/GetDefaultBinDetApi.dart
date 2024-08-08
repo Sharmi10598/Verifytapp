@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'package:http/http.dart' as http;
 import '../../Constant/ConstantSapValues.dart';
+import '../../Constant/LocalUrl/GetLocalUrl.dart';
 import '../../Model/BinDetailsModel/DefaultBinModel.dart';
 
 class GetBinNumApi {
@@ -12,10 +13,11 @@ class GetBinNumApi {
 
     try {
       log('ConstantValues.token::${ConstantValues.token}');
-      log('http://91.203.133.224:92/api/WareSmart/v1/GetAuditUserDefaultBin?DocEntry=$docEntry');
+      log(Url.queryApi +
+          'WareSmart/v1/GetAuditUserDefaultBin?DocEntry=$docEntry');
       final response = await http.post(
-        Uri.parse(
-            'http://91.203.133.224:92/api/WareSmart/v1/GetAuditUserDefaultBin?DocEntry=$docEntry'),
+        Uri.parse(Url.queryApi +
+            'WareSmart/v1/GetAuditUserDefaultBin?DocEntry=$docEntry'),
         headers: {
           "accept": "/",
           "Authorization": 'bearer ' + ConstantValues.token,

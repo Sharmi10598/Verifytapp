@@ -7,6 +7,7 @@ import '../../Constant/Configuration.dart';
 import '../../Constant/ConstantSapValues.dart';
 import '../../Constant/Encripted.dart';
 import '../../Constant/Helper.dart';
+import '../../Constant/LocalUrl/GetLocalUrl.dart';
 import '../../Model/LoginModel/loginmodel.dart';
 
 //QP1A.190711.020
@@ -15,16 +16,16 @@ class LoginAPi {
     int resCode = 500;
 
     try {
-      // log("ConstantValues.token:::" + ConstantValues.token.toString());
+      log(Url.queryApi + "WareSmart/v1/MobileLogin");
       final response = await http.post(
-          // 91.203.133.224:92/api/WareSmart/v1/MobileLogin
-          Uri.parse("http://91.203.133.224:92/api/WareSmart/v1/MobileLogin"),
+          // http://216.48.189.191:4041/api/WareSmart/v1/MobileLogin
+          Uri.parse(Url.queryApi + "WareSmart/v1/MobileLogin"),
           headers: {"Content-Type": "application/json"},
           body: jsonEncode({
             "tenantId": "${postLoginData.tenentID}", //WareSmart
             "userCode": "${postLoginData.username}", //U003
             "password": "${postLoginData.password}", //SINE90
-            "deviceCode": "YUTYY7575775",
+            "deviceCode": "${postLoginData.deviceCode}",
             // "${postLoginData.deviceCode}", //HGAFSH88798 or YUTYY7575775
             "devicename": "${postLoginData.devicename}", //SAMSUNG
             "fcmToken": "${postLoginData.fcmToken}",
@@ -57,7 +58,7 @@ class LoginAPi {
         // log("tokenNew3:::" + tokenNew3['data'].toString());
         Map<String, dynamic> jres =
             config.parseJwt("${tokenNew3['data'].toString()}");
-        log("ABCD7333:::" + jres.toString());
+        // log("ABCD7333:::" + jres.toString());
         EncryptData Encrupt = new EncryptData();
         String? testData2 = Encrupt.decryption(jres['encryptedClaims']);
 

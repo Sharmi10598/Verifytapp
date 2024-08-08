@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'package:http/http.dart' as http;
 import '../../Constant/ConstantSapValues.dart';
+import '../../Constant/LocalUrl/GetLocalUrl.dart';
 import '../../Model/AuditModel/AuditByDeviceModel.dart';
 import '../../Model/DispositionListModel/DispositionModel.dart';
 
@@ -12,10 +13,9 @@ class DispListapi {
     int resCode = 500;
 
     try {
-      log('ConstantValues.token::${ConstantValues.token}');
+      // log('ConstantValues.token::${ConstantValues.token}');
       final response = await http.get(
-        Uri.parse(
-            "http://91.203.133.224:92/api/WareSmart/v1/GetDispositionList"),
+        Uri.parse(Url.queryApi + "WareSmart/v1/GetDispositionList"),
         headers: {
           "Content-Type": "application/json",
           "Authorization": 'bearer ' + ConstantValues.token,

@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:sqflite/sqlite_api.dart';
 import 'package:verifytapp/DBModel/ItemTable/LineDBTable.dart';
+import 'package:verifytapp/DBModel/ScanDataPostDB/ScanDataPushedDB.dart';
 import 'package:verifytapp/Model/ScanPostModel/ScanPostDataaModel.dart';
 
 import '../DBModel/CheckListDB/CheckListTDB.dart';
@@ -27,7 +28,7 @@ class DBOperation {
     List<Map<String, Object?>> result = await db.rawQuery('''
     select * from $auditDataModelTableDB
      ''');
-    log("QuotationFilteDB result:: ${result}");
+    log("insertAuditBy result:: ${result}");
   }
 
   static Future<List<Map<String, Object?>>> getAuditByDervice(
@@ -70,19 +71,49 @@ SELECT * from $auditDataModelTableDB
     List<Map<String, Object?>> result = await db.rawQuery('''
     select * from $scanpostTabled
      ''');
-    log("scanpost result:: ${result}");
+    log("scanpost111 result:: ${result}");
+  }
+
+  static Future insertPushedscanpostData(
+      Database db, List<ScanDataPost> values) async {
+    var data = values.map((e) => e.toMap()).toList();
+    var batch = db.batch();
+    data.forEach((es) async {
+      batch.insert(pushedScanTabled, es);
+    });
+
+    await batch.commit();
+    List<Map<String, Object?>> result = await db.rawQuery('''
+    select * from $pushedScanTabled
+     ''');
+    log("pushedScanTabled resultxxx:: ${result}");
+  }
+
+  static Future<List<Map<String, Object?>>> getpushedscandataData(
+      Database db) async {
+    final List<Map<String, Object?>> result = await db.rawQuery('''
+SELECT * from $pushedScanTabled
+''');
+    log("pushedScanTabled Result::${result.toString()}");
+    return result;
+  }
+
+  static Future<List<Map<String, Object?>>> DeleteScandata(Database db) async {
+    final List<Map<String, Object?>> result = await db.rawQuery('''
+Delete  from $scanpostTabled
+''');
+    log("scanpost222 Result::${result.toString()}");
+    return result;
   }
 
   static Future<List<Map<String, Object?>>> getscandataData(Database db) async {
     final List<Map<String, Object?>> result = await db.rawQuery('''
 SELECT * from $scanpostTabled
 ''');
-    log("scanpost Result::${result.toString()}");
+    log("scanpost222 Result::${result.toString()}");
     return result;
   }
 
-// Serialbatch
-// ItemCode
   static Future<List<Map<String, Object?>>> checkScandata(
       Database db, String serialbatch, String itemCode) async {
     log('''
@@ -95,13 +126,25 @@ SELECT * from $scanpostTabled where Serialbatch="$serialbatch" and ItemCode="$it
     return result;
   }
 
+  static Future<List<Map<String, Object?>>> checkSsguIdScandata(
+      Database db, String scanguidd) async {
+    log('''
+SELECT * from $scanpostTabled where scanguid="$scanguidd" 
+''');
+    final List<Map<String, Object?>> result = await db.rawQuery('''
+SELECT * from $scanpostTabled where scanguid="$scanguidd"
+''');
+    log("checkScandata Result::${result.length.toString()}");
+    return result;
+  }
+
   static Future<List<Map<String, Object?>>> getchecklistAllData(
     Database db,
   ) async {
     final List<Map<String, Object?>> result = await db.rawQuery('''
 SELECT * from $scanchecklisttdb
 ''');
-    log("scanchecklisttdb Result::${result.length.toString()}");
+    log("scanchecklisttdb11 Result::${result.length.toString()}");
     return result;
   }
 
@@ -110,7 +153,7 @@ SELECT * from $scanchecklisttdb
     final List<Map<String, Object?>> result = await db.rawQuery('''
 SELECT * from $scanchecklisttdb where Auditid = $auditId
 ''');
-    log("scanchecklisttdb Result::${result.length.toString()}");
+    log("scanchecklisttdb22 Result::${result.length.toString()}");
     return result;
   }
 
@@ -121,7 +164,7 @@ SELECT * from $scanchecklisttdb where Auditid = $auditId
     final List<Map<String, Object?>> result = await db.rawQuery('''
  delete from $scanpostTabled where Auditid = $auditId
 ''');
-    log("scanchecklisttdb Result::${result.length.toString()}");
+    log("scanchecklisttdb33 Result::${result.length.toString()}");
     return result;
   }
 
@@ -130,7 +173,7 @@ SELECT * from $scanchecklisttdb where Auditid = $auditId
     final List<Map<String, Object?>> result = await db.rawQuery('''
 delete from from $scanchecklisttdb where Auditid = $auditId
 ''');
-    log("scanchecklisttdb Result::${result.length.toString()}");
+    log("scanchecklisttdb44 Result::${result.length.toString()}");
     return result;
   }
 
@@ -140,6 +183,20 @@ delete from from $scanchecklisttdb where Auditid = $auditId
     var batch = db.batch();
     data.forEach((es) async {
       batch.insert(scanchecklisttdb, es);
+    });
+    await batch.commit();
+    List<Map<String, Object?>> result = await db.rawQuery('''
+    select * from $scanchecklisttdb
+     ''');
+    log("DispListData result:: ${result.length}");
+  }
+
+  static Future insertPushedchecklistData(
+      Database db, List<DispListData> values) async {
+    var data = values.map((e) => e.toMap()).toList();
+    var batch = db.batch();
+    data.forEach((es) async {
+      batch.insert(pushedScanTabled, es);
     });
     await batch.commit();
     List<Map<String, Object?>> result = await db.rawQuery('''
@@ -279,12 +336,12 @@ SELECT *  from $checkListDataDB
     List<Map<String, Object?>> result = await db.rawQuery('''
     select * from $scanpostTabled
      ''');
-    log("scanpost result:: ${result.length}");
+    log("scanpost333 result:: ${result.length}");
     await db.rawQuery('delete from $scanpostTabled');
     List<Map<String, Object?>> result2 = await db.rawQuery('''
     select * from $scanpostTabled
      ''');
-    log("scanpost result:: ${result2.length}");
+    log("scanpost444 result:: ${result2.length}");
   }
 
   static Future<void> truncateCheckListT(Database db) async {

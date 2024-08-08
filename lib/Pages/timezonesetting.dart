@@ -51,6 +51,7 @@ class _NetworkTimeCheckState extends State<NetworkTimeCheck>
         );
       } else if (_networkTimeStatus == 'Disabled') {
         showDialog(
+            barrierDismissible: false,
             context: context,
             builder: (context) {
               return AlertDialog(

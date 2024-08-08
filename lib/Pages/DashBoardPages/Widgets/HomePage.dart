@@ -5,7 +5,9 @@ import 'dart:io';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
+import 'package:verifytapp/Constant/ConstantRoutes.dart';
 import 'package:verifytapp/Constant/Screen.dart';
 import 'package:verifytapp/Controllers/DashBoardController/DashBoradControllers.dart';
 
@@ -146,9 +148,19 @@ class _HomePageState extends State<HomePage> {
                                       Icons.shopping_cart,
                                       color: theme.primaryColor,
                                     ),
-                                    const Icon(
-                                      Icons.arrow_forward,
-                                      color: Colors.grey,
+                                    GestureDetector(
+                                      onTap: () {
+                                        context
+                                            .read<DashBoardCtrlProvider>()
+                                            .selectedIndex = 1;
+
+                                        Get.offAllNamed(
+                                            ConstantRoutes.dashboard);
+                                      },
+                                      child: Icon(
+                                        Icons.arrow_forward,
+                                        color: Colors.grey,
+                                      ),
                                     )
                                   ],
                                 ),
@@ -185,7 +197,7 @@ class _HomePageState extends State<HomePage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Row(
+                              Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
@@ -193,9 +205,18 @@ class _HomePageState extends State<HomePage> {
                                     Icons.calendar_month,
                                     color: Colors.purple,
                                   ),
-                                  Icon(
-                                    Icons.arrow_forward,
-                                    color: Colors.grey,
+                                  GestureDetector(
+                                    onTap: () {
+                                      context
+                                          .read<DashBoardCtrlProvider>()
+                                          .selectedIndex = 1;
+
+                                      Get.offAllNamed(ConstantRoutes.dashboard);
+                                    },
+                                    child: Icon(
+                                      Icons.arrow_forward,
+                                      color: Colors.grey,
+                                    ),
                                   )
                                 ],
                               ),
@@ -239,15 +260,24 @@ class _HomePageState extends State<HomePage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Row(
+                              Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   Icon(Icons.bar_chart_outlined,
                                       color: Colors.indigo),
-                                  Icon(
-                                    Icons.arrow_forward,
-                                    color: Colors.grey,
+                                  GestureDetector(
+                                    onTap: () {
+                                      context
+                                          .read<DashBoardCtrlProvider>()
+                                          .selectedIndex = 1;
+
+                                      Get.offAllNamed(ConstantRoutes.dashboard);
+                                    },
+                                    child: Icon(
+                                      Icons.arrow_forward,
+                                      color: Colors.grey,
+                                    ),
                                   )
                                 ],
                               ),

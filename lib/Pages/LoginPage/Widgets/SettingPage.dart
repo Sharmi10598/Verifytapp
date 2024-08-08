@@ -98,7 +98,7 @@ class SettingWidgetState extends State<SettingWidget> {
               height: Screens.fullHeight(context) * 0.02,
             ),
             Form(
-              key: context.read<LoginController>().formkey[1],
+              key: context.read<LoginController>().formkeys[1],
               child: Column(
                 children: [
                   Container(
@@ -141,7 +141,7 @@ class SettingWidgetState extends State<SettingWidget> {
                           borderRadius: BorderRadius.circular(5),
                           borderSide: BorderSide(color: Colors.grey),
                         ),
-                        hintText: 'Customer Id',
+                        hintText: 'Customer ID',
                         hintStyle: widget.theme.textTheme.bodyMedium
                             ?.copyWith(color: Colors.grey),
                         filled: false,
@@ -160,7 +160,9 @@ class SettingWidgetState extends State<SettingWidget> {
             ),
             GestureDetector(
               onTap: () {
-                context.read<LoginController>().settingvalidate(context);
+                setState(() {
+                  context.read<LoginController>().settingvalidate(context);
+                });
                 // context.read<LoginController>().loadSettings();
               },
               child: Container(

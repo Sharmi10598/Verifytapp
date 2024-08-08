@@ -72,8 +72,9 @@ class DriftItemMaster extends Table {
   String get tableName => 'drifitemmaster';
 }
 
-// {\"AutoID\":370665,\"ScheduleID\":11,\"WhsCode\":\"W001\",\"ItemCode\":\"001@\",\"BinCode\":\"B011\",\"SerailBatch\":\"S00001-3\",\"Quantity\":1.00,
-// \"UoM\":null,\"CreatedBy\":5,\"CreatedDatetime\":\"2024-07-23T12:31:13.98\",\"UpdatedBy\":null,\"UpdatedDatetime\":null,\"traceid\":\"a87bc362-b243-4dd4-8a13-68a7ac5b2ac0\"},
+// {\"AutoID\":40446065,\"ScheduleID\":79,\"WhsCode\":\"W001\",\"ItemCode\":\"71226\",\"BinCode\":\"B06\",\"SerailBatch\":\"S0071226-3\",\"AltSerialBatch\":null,
+// \"Quantity\":1.00,\"StockStatus\":null,\"UoM\":null,\"CreatedBy\":5,\"CreatedDatetime\":\"2024-08-06T16:40:46.19\",\"UpdatedBy\":null,\"UpdatedDatetime\":null,\"traceid\":\"aa59d8ce-110a-4047-a534-0f29976acbb5\",\"DispID\":1,\"InDate\":\"2024-08-06T00:00:00\",\"ExpDate\":\"2030-01-27T00:00:00\"}
+
 class DriftLineMaster extends Table {
   IntColumn get IMid => integer().autoIncrement()();
   IntColumn get autoId => integer().named("AutoID").nullable()();
@@ -86,6 +87,8 @@ class DriftLineMaster extends Table {
   TextColumn get binCode => text().named("BinCode").nullable()();
 
   TextColumn get serialbatch => text().named("SerailBatch").nullable()();
+  TextColumn get altSerialbatch => text().named("AltSerialBatch").nullable()();
+
   RealColumn get quantity => real().named("Quantity").nullable()();
 
   TextColumn get uom => text().named("UoM").nullable()();

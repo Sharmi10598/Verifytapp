@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:device_info_plus/device_info_plus.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
@@ -9,7 +8,10 @@ import 'package:sqflite/sqflite.dart';
 import '../../Model/CheckListModel/CheckLstModel.dart';
 import '../../Model/DispositionListModel/DispositionModel.dart';
 import '../../Model/ScanPostModel/ScanPostDataaModel.dart';
-import '../../Services/loadCompleteApi.dart';
+import '../../Pages/AuditPages/Widgets/Imagepickerscree.dart';
+import '../../Pages/ItemDetailsPages/ItemDetailsScreen.dart';
+import '../../Services/AttachmentApi/AttachmentFileLinkApi.dart';
+import '../../Services/GetAuditApi/loadCompleteApi.dart';
 import '../../driftDB/driftTablecreation.dart';
 import '../../driftDB/driftoperation.dart';
 import '../ConfigPageController/ConfigScreenController.dart';
@@ -49,10 +51,12 @@ class AuditCtrlProvider extends ChangeNotifier {
 
     Database db = (await DBHelper.getInstance())!;
     clearAllData();
-    callGetAuditApi(context, theme);
+    await getAuditBydeviceData();
+    checkNeworkConnectivity(
+      context,
+    );
     getCheckListForm();
-    checkDeviceType();
-    checkNeworkConnectivity(context, theme);
+
     // await driftoperation.getallLineproduct(database);
     // await driftoperation.getallproduct(database);
   }
@@ -112,29 +116,92 @@ class AuditCtrlProvider extends ChangeNotifier {
   // }
 
   bool freezeqty = false;
-  bool freezeItemCode = true;
-
+  bool freezeItemCode = false;
+  bool resetaudit = false;
   List<LineData> lineresult = [];
   List<HeaderData> headerresult = [];
   List<CheckListData> getCkeckDataList = [];
+  bool disabledBtn = false;
+  getAuditBydeviceData() async {
+    getAuditList = [];
+    errorMsg = '';
+    Database db = (await DBHelper.getInstance())!;
+    List<Map<String, Object?>> result2 =
+        await DBOperation.getAuditByDervice(db);
+    log('MMMMMMMMMMMMMMMMMMMMM::${result2.length}');
+
+    for (var i = 0; i < result2.length; i++) {
+      getAuditList.add(GetAuditDataModel(
+          auditFrom: result2[i]['AuditFrom'].toString(),
+          user: result2[i]['User'].toString(),
+          percent: result2[i]['Percent'] != null
+              ? double.parse(result2[i]['Percent'].toString())
+              : 0,
+          unitsScanned: result2[i]['UnitsScanned'] != null
+              ? int.parse(result2[i]['UnitsScanned'].toString())
+              : 0,
+          totalItems: result2[i]['TotalItems'] != null
+              ? int.parse(result2[i]['TotalItems'].toString())
+              : 0,
+          auditTo: result2[i]['AuditTo'].toString(),
+          // blockTrans: bool.parse(result2[i][' blockTrans'].toString()),
+          createdBy: result2[i]['CreatedBy'] != null
+              ? int.parse(result2[i]['CreatedBy'].toString())
+              : 0,
+          createdDatetime: result2[i]['CreatedDatetime'].toString(),
+          docDate: result2[i]['DocDate'].toString(),
+          docEntry: result2[i]['DocEntry'] != null
+              ? int.parse(result2[i]['DocEntry'].toString())
+              : 0,
+          docNum: result2[i]['DocNum'] != null
+              ? int.parse(result2[i]['DocNum'].toString())
+              : 0,
+          endDate: result2[i]['EndDate'].toString(),
+          remarks: result2[i]['Remarks'].toString(),
+          // repeat: result2[i]['repeat'] != null
+          //     ? bool.parse(result2[i]['repeat'].toString())
+          //     : false,
+          repeatDay: result2[i]['RepeatDay'] != null
+              ? int.parse(result2[i]['RepeatDay'].toString())
+              : 0,
+          repeatFrequency: result2[i]['RepeatFrequency'].toString(),
+          scheduleName: result2[i]['ScheduleName'].toString(),
+          startDate: result2[i]['StartDate'].toString(),
+          status: result2[i]['Status'].toString(),
+          traceid: result2[i]['Traceid'].toString(),
+          updatedBy: result2[i]['UpdatedBy'] != null
+              ? int.parse(result2[i]['UpdatedBy'].toString())
+              : 0,
+          updatedDatetime: result2[i]['UpdatedDatetime'].toString(),
+          whsCode: result2[i]['WhsCode'] != null
+              ? result2[i]['WhsCode'].toString()
+              : '',
+          deviceCode: ''));
+    }
+    splitAuditJob();
+  }
 
   clearAllData() async {
     String firDt = DateTime.now().toString();
-    log("CCCCCCCCCCCCCCCC:::" + config.firstDate());
-    getAuditList = [];
     openAuditList = [];
     completedAuditList = [];
     upcomingtAuditList = [];
     dispAllvalList = [];
+    resetaudit = false;
     scandata = [];
+    getAuditList = [];
     assignvalue = '';
     checklistdata = [];
     isLoading = true;
+    seriesfocus = true;
+    disabledBtn = false;
+    itemfocus = true;
     mycontroller = List.generate(20, (i) => TextEditingController());
     apidate = '';
     isClickedStart = false;
     errorMsg = '';
     freezeqty = false;
+    isLoading = true;
     isSelectedCusTag = '';
     itemCode = '';
     skuCosde = '';
@@ -147,6 +214,7 @@ class AuditCtrlProvider extends ChangeNotifier {
 
   Future imagetoBinary2(ImageSource source, BuildContext context) async {
     List<File> filesz = [];
+    urlImage = '';
     // await LocationTrack.checkcamlocation();
     final image = await ImagePicker().pickImage(source: source);
     if (image == null) return;
@@ -185,7 +253,11 @@ class AuditCtrlProvider extends ChangeNotifier {
         //     fileName: fullPath));
         log("filename::$fullPath");
         log("filename::${filedata[i].fileName}");
-
+        OrderAttachmentApiApi.getData(filesz[i].path).then((value) {
+          log("valuevaluevalue::$value");
+          urlImage = value;
+          notifyListeners();
+        });
         // callProfileUpdateApi1(filedata[i].fileName,image.name,context);
       }
       // log("filesz lenghthhhhh::::::" + filedata.length.toString());
@@ -202,7 +274,7 @@ class AuditCtrlProvider extends ChangeNotifier {
     // showtoast();
   }
 
-  sheetbottom(BuildContext context) {
+  imageBottomSheet(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     final theme = Theme.of(context);
     {
@@ -249,7 +321,7 @@ class AuditCtrlProvider extends ChangeNotifier {
   List<File> files = [];
   FilePickerResult? result;
   List<FilesData> filedata = [];
-
+  String urlImage = '';
   disableKeyBoard(BuildContext context) {
     log('message un focusssss1111:::');
     FocusScope.of(context).unfocus();
@@ -258,6 +330,7 @@ class AuditCtrlProvider extends ChangeNotifier {
 
   selectattachment(BuildContext context) async {
     List<File> filesz = [];
+    urlImage = '';
     log(files.length.toString());
     log('filessssssssssssssssssssss');
     // result = await FilePicker.platform.pickFiles(allowMultiple: false);
@@ -291,7 +364,11 @@ class AuditCtrlProvider extends ChangeNotifier {
           filedata.add(FilesData(
               fileBytes: base64Encode(intdata), fileName: filesz[i].path));
           notifyListeners();
-
+          OrderAttachmentApiApi.getData(filesz[i].path).then((value) {
+            log("valuevaluevalue::$value");
+            urlImage = value;
+            notifyListeners();
+          });
           //New
           // XFile? photoCompressedFile =await testCompressAndGetFile(filesz[i],filesz[i].path);
           // await FileStorage.writeCounter('${photoCompressedFile!.name}_1', photoCompressedFile);
@@ -409,34 +486,34 @@ class AuditCtrlProvider extends ChangeNotifier {
 //     notifyListeners();
 //   }
 
-  Future<void> checkDeviceType() async {
-    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+  // Future<void> checkDeviceType() async {
+  //   DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
 
-    if (Platform.isAndroid) {
-      AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-      String model = androidInfo.model.toLowerCase();
-      String manufacturer = androidInfo.manufacturer.toLowerCase();
+  //   if (Platform.isAndroid) {
+  //     AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+  //     String model = androidInfo.model.toLowerCase();
+  //     String manufacturer = androidInfo.manufacturer.toLowerCase();
 
-      // Add custom logic for known scanner models
-      if (model.contains('ct50') || model.contains('ct60')) {
-        print('This device is a scanner');
-      } else {
-        print('This device is a mobile phone');
-      }
-    } else if (Platform.isIOS) {
-      IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
-      String model = iosInfo.utsname.machine.toLowerCase();
+  //     // Add custom logic for known scanner models
+  //     if (model.contains('ct50') || model.contains('ct60')) {
+  //       print('This device is a scanner');
+  //     } else {
+  //       print('This device is a mobile phone');
+  //     }
+  //   } else if (Platform.isIOS) {
+  //     IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
+  //     String model = iosInfo.utsname.machine.toLowerCase();
 
-      // Add custom logic for known scanner models
-      if (model.contains('scanner_model_identifier')) {
-        print('This device is a scanner');
-      } else {
-        print('This device is a mobile phone');
-      }
-    } else {
-      print('Unsupported platform');
-    }
-  }
+  //     // Add custom logic for known scanner models
+  //     if (model.contains('scanner_model_identifier')) {
+  //       print('This device is a scanner');
+  //     } else {
+  //       print('This device is a mobile phone');
+  //     }
+  //   } else {
+  //     print('Unsupported platform');
+  //   }
+  // }
 
   bool isLoading = true;
   List<GetAuditDataModel> getAuditList = [];
@@ -489,7 +566,6 @@ class AuditCtrlProvider extends ChangeNotifier {
   callGetAuditApi(BuildContext context, ThemeData theme) async {
     // final theme = Theme.of(context);
     Database db = (await DBHelper.getInstance())!;
-    getAuditList = [];
     getAuditList2 = [];
     openAuditList = [];
     completedAuditList = [];
@@ -499,10 +575,65 @@ class AuditCtrlProvider extends ChangeNotifier {
     deviceId = await HelperFunctions.getDeviceIDSharedPreference();
     await GetAuditByDeviceApi.getData(deviceId!).then((value) async {
       if (value.stsCode >= 200 && value.stsCode <= 210) {
-        log('value.auditData lengyth::${value.auditData.length}');
-        getAuditList = value.auditData;
+        // log('value.auditData lengyth::${value.auditData.length}');
+        getAuditList = [];
+        DBOperation.truncateAuditByDevice(db);
+        getAuditList2 = value.auditData;
+        DBOperation.insertAuditByDervice(db, getAuditList2);
+        List<Map<String, Object?>> result2 =
+            await DBOperation.getAuditByDervice(db);
+        if (result2.isNotEmpty) {
+          for (var i = 0; i < result2.length; i++) {
+            getAuditList.add(GetAuditDataModel(
+                auditFrom: result2[i]['AuditFrom'].toString(),
+                user: result2[i]['User'].toString(),
+                percent: result2[i]['Percent'] != null
+                    ? double.parse(result2[i]['Percent'].toString())
+                    : 0,
+                unitsScanned: result2[i]['UnitsScanned'] != null
+                    ? int.parse(result2[i]['UnitsScanned'].toString())
+                    : 0,
+                totalItems: result2[i]['TotalItems'] != null
+                    ? int.parse(result2[i]['TotalItems'].toString())
+                    : 0,
+                auditTo: result2[i]['AuditTo'].toString(),
+                // blockTrans: bool.parse(result2[i][' blockTrans'].toString()),
+                createdBy: result2[i]['CreatedBy'] != null
+                    ? int.parse(result2[i]['CreatedBy'].toString())
+                    : 0,
+                createdDatetime: result2[i]['CreatedDatetime'].toString(),
+                docDate: result2[i]['DocDate'].toString(),
+                docEntry: result2[i]['DocEntry'] != null
+                    ? int.parse(result2[i]['DocEntry'].toString())
+                    : 0,
+                docNum: result2[i]['DocNum'] != null
+                    ? int.parse(result2[i]['DocNum'].toString())
+                    : 0,
+                endDate: result2[i]['EndDate'].toString(),
+                remarks: result2[i]['Remarks'].toString(),
+                // repeat: result2[i]['repeat'] != null
+                //     ? bool.parse(result2[i]['repeat'].toString())
+                //     : false,
+                repeatDay: result2[i]['RepeatDay'] != null
+                    ? int.parse(result2[i]['RepeatDay'].toString())
+                    : 0,
+                repeatFrequency: result2[i]['RepeatFrequency'].toString(),
+                scheduleName: result2[i]['ScheduleName'].toString(),
+                startDate: result2[i]['StartDate'].toString(),
+                status: result2[i]['Status'].toString(),
+                traceid: result2[i]['Traceid'].toString(),
+                updatedBy: result2[i]['UpdatedBy'] != null
+                    ? int.parse(result2[i]['UpdatedBy'].toString())
+                    : 0,
+                updatedDatetime: result2[i]['UpdatedDatetime'].toString(),
+                whsCode: result2[i]['WhsCode'] != null
+                    ? result2[i]['WhsCode'].toString()
+                    : '',
+                deviceCode: ''));
+          }
+        }
         isLoading = false;
-        log('getAuditList::${getAuditList.length}');
+        // log('getAuditList::${getAuditList.length}');
         splitAuditJob();
         notifyListeners();
       } else if (value.stsCode >= 400 && value.stsCode <= 410) {
@@ -511,6 +642,7 @@ class AuditCtrlProvider extends ChangeNotifier {
         isLoading = false;
         notifyListeners();
       } else {
+        isLoading = false;
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text('Check Your Internet..!!'),
           backgroundColor: Colors.red,
@@ -549,10 +681,11 @@ class AuditCtrlProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  final List<String> _tags = ["flutter", "fluttercampus"];
+  final List<String> _tags = [];
 
-  void _addTag(String tag) {
+  void addTag(String tag) {
     _tags.add(tag);
+    notifyListeners();
   }
 
   void _removeTag(String tag) {
@@ -644,255 +777,261 @@ class AuditCtrlProvider extends ChangeNotifier {
         context: context,
         builder: (BuildContext context) {
           return StatefulBuilder(builder: (BuildContext context, setSt) {
-            return SingleChildScrollView(
-              child: Container(
-                padding: EdgeInsets.only(
-                    left: Screens.width(context) * 0.03,
-                    top: Screens.padingHeight(context) * 0.02,
-                    right: Screens.width(context) * 0.03,
-                    bottom: Screens.padingHeight(context) * 0.03),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                        width: Screens.width(context),
-                        alignment: Alignment.center,
-                        child: Text(
-                          '${getckeckDataListForm55[0].templateName}',
-                          style:
-                              theme.textTheme.bodyLarge?.copyWith(fontSize: 18),
-                        )),
-                    Container(
-                        padding: EdgeInsets.only(
-                          top: Screens.padingHeight(context) * 0.02,
-                        ),
-                        height: Screens.padingHeight(context) * 0.45,
-                        width: Screens.width(context),
-                        child: ListView.builder(
-                            scrollDirection: Axis.vertical,
-                            itemCount: getckeckDataListForm55.length,
-                            itemBuilder: (context, index) {
-                              var litstagex = getckeckDataListForm55[index]
-                                  .listValue!
-                                  .split(',');
-                              // for (var i = 0; i < litstagex.length; i++) {
-                              //   chklistttt.add(CheckListselect(
-                              //       indx: index,
-                              //       listval: litstagex[i],
-                              //       issele: false));
-                              // }
-                              chkListController[index].text = 'x';
-                              return Column(
-                                children: [
-                                  Container(
-                                    // height: Screens.padingHeight(context) * 0.06,
-                                    width: Screens.width(context),
-                                    child: TextField(
-                                      readOnly: true,
-                                      controller: chkListController[index],
-                                      decoration: InputDecoration(
-                                        labelText:
-                                            '${getckeckDataListForm55[index].checklistName}',
-                                        suffixIcon: Container(
-                                          padding: EdgeInsets.only(
-                                              left: Screens.width(context) *
-                                                  0.03),
-                                          height:
-                                              Screens.padingHeight(context) *
-                                                  0.07,
-                                          width: Screens.width(context),
-                                          child: ListView.builder(
-                                            scrollDirection: Axis.horizontal,
-                                            itemCount:
-                                                // getckeckDataListForm55[index]
-                                                //     .listValue!
-                                                //     .split(',')
-                                                litstagex.length,
-                                            itemBuilder: (context, indexx) {
-                                              return Container(
-                                                child: Row(
-                                                  children: [
-                                                    Container(
-                                                      decoration: BoxDecoration(
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(4),
-                                                          color: litstagex[
-                                                                      indexx] ==
-                                                                  getckeckDataListForm55[
-                                                                          index]
-                                                                      .isselectlistval!
-                                                              ? theme
-                                                                  .primaryColor
-                                                                  .withOpacity(
-                                                                      0.3)
-                                                              : Colors.white,
-                                                          border: Border.all(
-                                                              color: theme
-                                                                  .primaryColor,
-                                                              width: 1)),
-                                                      padding: EdgeInsets.only(
-                                                          left: Screens.width(
-                                                                  context) *
-                                                              0.03,
-                                                          right: Screens.width(
-                                                                  context) *
-                                                              0.03),
-                                                      height:
-                                                          Screens.padingHeight(
-                                                                  context) *
-                                                              0.043,
-                                                      child: IconButton(
-                                                          icon: getckeckDataListForm55[
-                                                                          index]
-                                                                      .acceptAttach ==
-                                                                  true
-                                                              ? Icon(
-                                                                  Icons
-                                                                      .attach_file,
-                                                                  color: theme
-                                                                      .primaryColor)
-                                                              : Container(
-                                                                  alignment:
-                                                                      Alignment
-                                                                          .center,
-                                                                  child: Text(
-                                                                    litstagex[
-                                                                            indexx]
-                                                                        .toString(),
-                                                                    style: theme
-                                                                        .textTheme
-                                                                        .bodyLarge
-                                                                        ?.copyWith(
-                                                                            color:
-                                                                                theme.primaryColor),
-                                                                  ),
-                                                                ),
-                                                          onPressed: () {
-                                                            if (getckeckDataListForm55[
-                                                                        index]
-                                                                    .acceptAttach ==
-                                                                true) {
-                                                              sheetbottom(
-                                                                  context);
-                                                            } else {
-                                                              setSt(
-                                                                () {
-                                                                  if (isselected ==
-                                                                      true) {
-                                                                    isselected =
-                                                                        false;
-                                                                  } else {
-                                                                    isselected =
-                                                                        true;
-                                                                  }
-                                                                  setSt(() {
-                                                                    getckeckDataListForm55[index]
-                                                                            .isselectlistval =
-                                                                        litstagex[
-                                                                            indexx];
-                                                                  });
-                                                                  // isselected =
-                                                                  //     !isselected;
-
-                                                                  log('indexxindexxindexx::$isselected');
-                                                                  if (litstagex[
-                                                                          indexx] ==
-                                                                      getckeckDataListForm55[
-                                                                              index]
-                                                                          .isselectlistval!) {}
-
-                                                                  // print(
-                                                                  //     '${litstagex[indexx]} sdfsdf::${getckeckDataListForm55[index].isselectlistval}');
-
-                                                                  getckeckDataListForm55[
-                                                                              index]
-                                                                          .isselectlistval ==
-                                                                      true;
-                                                                  log('${getckeckDataListForm55[index].isselectlistval}');
-                                                                  log('message list::${litstagex[indexx]}');
-
-                                                                  // for (var i = 0;
-                                                                  //     i <
-                                                                  //         chklistttt
-                                                                  //             .length;
-                                                                  //     i++) {
-                                                                  //   checlist22 = CheckListselect(
-                                                                  //       indx: chklistttt[
-                                                                  //               i]
-                                                                  //           .indx,
-                                                                  //       listval: chklistttt[
-                                                                  //               i]
-                                                                  //           .listval);
-                                                                  // }
-                                                                },
-                                                              );
-
-                                                              checklistdata.add(DispListData(
-                                                                  attachurl: '',
-                                                                  auditid: getckeckDataListForm55[
-                                                                          index]
-                                                                      .docEntry,
-                                                                  checklistcode:
-                                                                      getckeckDataListForm55[
-                                                                              index]
-                                                                          .checklistCode,
-                                                                  checklistvalue:
-                                                                      isSelectedCusTag));
-                                                            }
-
-                                                            log('checklistdatachecklistdata::${checklistdata.length}');
-                                                          }),
-                                                    ),
-                                                    SizedBox(
-                                                        width: Screens.width(
-                                                                context) *
-                                                            0.02)
-                                                  ],
-                                                ),
-                                              );
-                                            },
-                                          ),
-                                        ),
-                                        border: const OutlineInputBorder(),
-                                      ),
-                                      onSubmitted: (text) {
-                                        if (text.isNotEmpty) {
-                                          _addTag(text);
-                                        }
-                                      },
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    height:
-                                        Screens.padingHeight(context) * 0.015,
-                                  )
-                                ],
-                              );
-                            })),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8)),
-                          foregroundColor: Colors.white,
-                          backgroundColor: theme.primaryColor),
-                      onPressed: () {},
-
-                      // context
-                      //     .read<AuditCtrlProvider>()
-                      //     .callScannLockedApi(context, theme);
-
-                      child: const Center(
-                        child: Text('OK'),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
+            return GetImageFilePage();
           });
         });
+    //
+    // SingleChildScrollView(
+    //       child: Container(
+    //         padding: EdgeInsets.only(
+    //             left: Screens.width(context) * 0.03,
+    //             top: Screens.padingHeight(context) * 0.02,
+    //             right: Screens.width(context) * 0.03,
+    //             bottom: Screens.padingHeight(context) * 0.03),
+    //         child: Column(
+    //           mainAxisSize: MainAxisSize.min,
+    //           crossAxisAlignment: CrossAxisAlignment.start,
+    //           children: [
+    //             Container(
+    //                 width: Screens.width(context),
+    //                 alignment: Alignment.center,
+    //                 child: Text(
+    //                   '${getckeckDataListForm55[0].templateName}',
+    //                   style:
+    //                       theme.textTheme.bodyLarge?.copyWith(fontSize: 18),
+    //                 )),
+    //             Container(
+    //                 padding: EdgeInsets.only(
+    //                   top: Screens.padingHeight(context) * 0.02,
+    //                 ),
+    //                 height: Screens.padingHeight(context) * 0.45,
+    //                 width: Screens.width(context),
+    //                 child: ListView.builder(
+    //                     scrollDirection: Axis.vertical,
+    //                     itemCount: getckeckDataListForm55.length,
+    //                     itemBuilder: (context, index) {
+    //                       var litstagex = getckeckDataListForm55[index]
+    //                           .listValue!
+    //                           .split(',');
+    //                       // for (var i = 0; i < litstagex.length; i++) {
+    //                       //   chklistttt.add(CheckListselect(
+    //                       //       indx: index,
+    //                       //       listval: litstagex[i],
+    //                       //       issele: false));
+    //                       // }
+    //                       chkListController[index].text = 'x';
+    //                       return Column(
+    //                         children: [
+    //                           Container(
+    //                             // height: Screens.padingHeight(context) * 0.06,
+    //                             width: Screens.width(context),
+    //                             child: TextField(
+    //                               readOnly: true,
+    //                               controller: chkListController[index],
+    //                               decoration: InputDecoration(
+    //                                 labelText:
+    //                                     '${getckeckDataListForm55[index].checklistName}',
+    //                                 suffixIcon: Container(
+    //                                   padding: EdgeInsets.only(
+    //                                       left: Screens.width(context) *
+    //                                           0.03),
+    //                                   height:
+    //                                       Screens.padingHeight(context) *
+    //                                           0.07,
+    //                                   width: Screens.width(context),
+    //                                   child: ListView.builder(
+    //                                     scrollDirection: Axis.horizontal,
+    //                                     itemCount:
+    //                                         // getckeckDataListForm55[index]
+    //                                         //     .listValue!
+    //                                         //     .split(',')
+    //                                         litstagex.length,
+    //                                     itemBuilder: (context, indexx) {
+    //                                       return Container(
+    //                                         child: Row(
+    //                                           children: [
+    //                                             Container(
+    //                                               decoration: BoxDecoration(
+    //                                                   borderRadius:
+    //                                                       BorderRadius
+    //                                                           .circular(4),
+    //                                                   color: litstagex[
+    //                                                               indexx] ==
+    //                                                           getckeckDataListForm55[
+    //                                                                   index]
+    //                                                               .isselectlistval!
+    //                                                       ? theme
+    //                                                           .primaryColor
+    //                                                           .withOpacity(
+    //                                                               0.3)
+    //                                                       : Colors.white,
+    //                                                   border: Border.all(
+    //                                                       color: theme
+    //                                                           .primaryColor,
+    //                                                       width: 1)),
+    //                                               padding: EdgeInsets.only(
+    //                                                   left: Screens.width(
+    //                                                           context) *
+    //                                                       0.03,
+    //                                                   right: Screens.width(
+    //                                                           context) *
+    //                                                       0.03),
+    //                                               height:
+    //                                                   Screens.padingHeight(
+    //                                                           context) *
+    //                                                       0.043,
+    //                                               child: IconButton(
+    //                                                   icon: getckeckDataListForm55[
+    //                                                                   index]
+    //                                                               .acceptAttach ==
+    //                                                           true
+    //                                                       ? Icon(
+    //                                                           Icons
+    //                                                               .attach_file,
+    //                                                           color: theme
+    //                                                               .primaryColor)
+    //                                                       : Container(
+    //                                                           alignment:
+    //                                                               Alignment
+    //                                                                   .center,
+    //                                                           child: Text(
+    //                                                             litstagex[
+    //                                                                     indexx]
+    //                                                                 .toString(),
+    //                                                             style: theme
+    //                                                                 .textTheme
+    //                                                                 .bodyLarge
+    //                                                                 ?.copyWith(
+    //                                                                     color:
+    //                                                                         theme.primaryColor),
+    //                                                           ),
+    //                                                         ),
+    //                                                   onPressed: () {
+    //                                                     if (getckeckDataListForm55[
+    //                                                                 index]
+    //                                                             .acceptAttach ==
+    //                                                         true) {
+    //                                                       imageBottomSheet(
+    //                                                           context);
+    //                                                     } else {
+    //                                                       setSt(
+    //                                                         () {
+    //                                                           if (isselected ==
+    //                                                               true) {
+    //                                                             isselected =
+    //                                                                 false;
+    //                                                           } else {
+    //                                                             isselected =
+    //                                                                 true;
+    //                                                           }
+    //                                                           setSt(() {
+    //                                                             getckeckDataListForm55[index]
+    //                                                                     .isselectlistval =
+    //                                                                 litstagex[
+    //                                                                     indexx];
+    //                                                           });
+    //                                                           // isselected =
+    //                                                           //     !isselected;
+
+    //                                                           log('indexxindexxindexx::$isselected');
+    //                                                           if (litstagex[
+    //                                                                   indexx] ==
+    //                                                               getckeckDataListForm55[
+    //                                                                       index]
+    //                                                                   .isselectlistval!) {}
+
+    //                                                           // print(
+    //                                                           //     '${litstagex[indexx]} sdfsdf::${getckeckDataListForm55[index].isselectlistval}');
+
+    //                                                           getckeckDataListForm55[
+    //                                                                       index]
+    //                                                                   .isselectlistval ==
+    //                                                               true;
+    //                                                           log('${getckeckDataListForm55[index].isselectlistval}');
+    //                                                           log('message list::${litstagex[indexx]}');
+
+    //                                                           // for (var i = 0;
+    //                                                           //     i <
+    //                                                           //         chklistttt
+    //                                                           //             .length;
+    //                                                           //     i++) {
+    //                                                           //   checlist22 = CheckListselect(
+    //                                                           //       indx: chklistttt[
+    //                                                           //               i]
+    //                                                           //           .indx,
+    //                                                           //       listval: chklistttt[
+    //                                                           //               i]
+    //                                                           //           .listval);
+    //                                                           // }
+    //                                                         },
+    //                                                       );
+
+    //                                                       checklistdata.add(DispListData(
+    //                                                           attachurl: '',
+    //                                                           auditid: getckeckDataListForm55[
+    //                                                                   index]
+    //                                                               .docEntry,
+    //                                                           checklistcode:
+    //                                                               getckeckDataListForm55[
+    //                                                                       index]
+    //                                                                   .checklistCode,
+    //                                                           checklistvalue:
+    //                                                               isSelectedCusTag));
+    //                                                     }
+
+    //                                                     log('checklistdatachecklistdata::${checklistdata.length}');
+    //                                                   }),
+    //                                             ),
+    //                                             SizedBox(
+    //                                                 width: Screens.width(
+    //                                                         context) *
+    //                                                     0.02)
+    //                                           ],
+    //                                         ),
+    //                                       );
+    //                                     },
+    //                                   ),
+    //                                 ),
+    //                                 border: const OutlineInputBorder(),
+    //                               ),
+    //                               onSubmitted: (text) {
+    //                                 if (text.isNotEmpty) {
+    //                                   addTag(text);
+    //                                 }
+    //                               },
+    //                             ),
+    //                           ),
+    //                           SizedBox(
+    //                             height:
+    //                                 Screens.padingHeight(context) * 0.015,
+    //                           )
+    //                         ],
+    //                       );
+    //                     })),
+    //             ElevatedButton(
+    //               style: ElevatedButton.styleFrom(
+    //                   shape: RoundedRectangleBorder(
+    //                       borderRadius: BorderRadius.circular(8)),
+    //                   foregroundColor: Colors.white,
+    //                   backgroundColor: theme.primaryColor),
+    //               onPressed: () {
+    //                 Get.back();
+    //               },
+
+    //               // context
+    //               //     .read<AuditCtrlProvider>()
+    //               //     .callScannLockedApi(context, theme);
+
+    //               child: const Center(
+    //                 child: Text('OK'),
+    //               ),
+    //             ),
+    //           ],
+    //         ),
+    //       ),
+    //     );
+    //   });
+    // });
   }
 
   checkTableEmpty(
@@ -910,7 +1049,7 @@ class AuditCtrlProvider extends ChangeNotifier {
     List<HeaderData> getheaderresult =
         await driftoperation.checkHeaderproduct(database, docEntry);
 
-    log('getlineresult11::${getlineresult.length} :::getheaderresult11::${getheaderresult.length}');
+    // log('getlineresult11::${getlineresult.length} :::getheaderresult11::${getheaderresult.length}');
     if (getlineresult.isNotEmpty && getheaderresult.isNotEmpty) {
       actionResetDialog(
         context,
@@ -926,7 +1065,7 @@ class AuditCtrlProvider extends ChangeNotifier {
       // log('getlineresult222 length::${getlineresult22.length}');
     } else {
       String mssgg2 =
-          'This Operation may take few minutes. Closing the application may interrupt the process. \n Do you want to continue ?';
+          'This Operation may take few minutes. Closing the application may interrupt the process. \nDo you want to continue ?';
       actionwarningDialog(context, theme, mssgg2, 'Start', docEntry, indx);
     }
     notifyListeners();
@@ -935,23 +1074,12 @@ class AuditCtrlProvider extends ChangeNotifier {
   void callGetAuditActionApi(BuildContext context, ThemeData theme,
       String actionName, int docEntry, int indx) async {
     Get.back();
-
     Database db = (await DBHelper.getInstance())!;
     final database = (await AppDatabase.initialize())!;
-
     auditActionHeaderList = [];
     auditActionLineList = [];
     errorMsg = '';
-    openAuditList[indx].isStarting = true;
 
-    // Future.delayed(Duration(seconds: 15)).then(
-    //   (value) {
-    //     openAuditList[indx].isStarting = false;
-    //     notifyListeners();
-    //   },
-    // );
-
-    notifyListeners();
     await GetAuditActionApi.getData(actionName, docEntry).then((value) async {
       if (value.stsCode >= 200 && value.stsCode <= 210) {
         auditActionHeaderList = value.auditData!.auditHeaderData;
@@ -970,6 +1098,7 @@ class AuditCtrlProvider extends ChangeNotifier {
           await driftoperation.insertBinMasterdatabase(
               auditActionBinMasterList, database);
         }
+        notifyListeners();
 
         List<LineData> getlineresult =
             await driftoperation.getallLineproduct(database);
@@ -977,47 +1106,65 @@ class AuditCtrlProvider extends ChangeNotifier {
             await driftoperation.getallproduct(database);
         List<BinMasterData> getbinresult =
             await driftoperation.getBinMasterdata(database);
-        openAuditList[indx].isStarting = false;
         await callGetAuditApi(context, theme);
         log('headerresult::${getheaderresult.length}::lineresult::${getlineresult.length}:::BinResult::${getbinresult.length}');
         if (getheaderresult.isNotEmpty && getlineresult.isNotEmpty) {
+          openAuditList[indx].isStarting = false;
           await LoadCompleteDataApi.getData(docEntry).then((value) async {
             if (value.stsCode == 200) {
-              log('Successsssss');
+              log('Successsssss1111');
+              await Get.defaultDialog(
+                  title: 'Success',
+                  content: Column(
+                    children: [
+                      Text('Data downloaded successfully'),
+                      ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8)),
+                              foregroundColor: Colors.white,
+                              backgroundColor: theme.primaryColor),
+                          onPressed: () {
+                            Get.back();
+                            // context.read<DashBoardCtrlProvider>().selectedIndex =
+                            //     1;
+                            // Get.offAllNamed(ConstantRoutes.dashboard);
+                          },
+                          child: const Text(' Ok '))
+                    ],
+                  ));
+              notifyListeners();
             }
           });
-
-          apiResponseDialog(context, theme, 'Data downloaded successfully');
-          // const snackBar2 = SnackBar(
-          //   content: Text('Data downloaded successfully'),
-          //   backgroundColor: Colors.greenAccent,
-          //   elevation: 10,
-          //   behavior: SnackBarBehavior.floating,
-          //   margin: EdgeInsets.all(5),
-          //   dismissDirection: DismissDirection.up,
-          // );
-          // ScaffoldMessenger.of(context).showSnackBar(snackBar2);
+          log('Successsssss222222');
           notifyListeners();
         }
-        // else {
-        //   const snackBar2 = SnackBar(
-        //     content: Text('Data downloading failed..!!'),
-        //     backgroundColor: Colors.greenAccent,
-        //     elevation: 10,
-        //     behavior: SnackBarBehavior.floating,
-        //     margin: EdgeInsets.all(5),
-        //     dismissDirection: DismissDirection.up,
-        //   );
-        //   ScaffoldMessenger.of(context).showSnackBar(snackBar2);
-        //   ScaffoldMessenger.of(context).removeCurrentSnackBar();
-
-        //   notifyListeners();
-        // }
         notifyListeners();
       } else if (value.stsCode >= 400 && value.stsCode <= 410) {
         openAuditList[indx].isStarting = false;
         errorMsg = value.exception;
-        apiResponseDialog(context, theme, errorMsg);
+        // apiResponseDialog(context, theme, value.exception);
+        await Get.defaultDialog(
+            title: 'Alert',
+            content: Column(
+              children: [
+                Text('${value.exception}'),
+                ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8)),
+                        foregroundColor: Colors.white,
+                        backgroundColor: theme.primaryColor),
+                    onPressed: () {
+                      Get.back();
+                      // context.read<DashBoardCtrlProvider>().selectedIndex =
+                      //     1;
+                      // Get.offAllNamed(ConstantRoutes.dashboard);
+                    },
+                    child: const Text(' Ok '))
+              ],
+            ));
+
         isLoading = false;
         notifyListeners();
       } else {
@@ -1030,7 +1177,6 @@ class AuditCtrlProvider extends ChangeNotifier {
           margin: EdgeInsets.all(5),
           dismissDirection: DismissDirection.up,
         ));
-        ScaffoldMessenger.of(context).removeCurrentSnackBar();
       }
     });
     notifyListeners();
@@ -1086,20 +1232,22 @@ class AuditCtrlProvider extends ChangeNotifier {
     // Database db = (await DBHelper.getInstance())!;
     listScanBatch = await driftoperation.getdriftallLineColumn(
         database, columnName, binValues);
+    List<BinMasterData> checkBin =
+        await driftoperation.checkBinMasterdata(database, binValues);
     // List<Map<String, Object?>> result2 =
     //     await DBOperation.checkBinInAuditLineData(db, columnName, binValues);
     callBinBlockApi(context, theme, binValues);
-    if (listScanBatch.isNotEmpty) {
+    if (listScanBatch.isNotEmpty || checkBin.isNotEmpty) {
+      seriesfocus = false;
+      ItemDetailsState.focus2.requestFocus();
+      // disableKeyBoard(context);
       log('AudioPlayAudioPlay');
       // /D/Sharmila/verifytapp/asset/sounds/bin_selection.mp3
-      playAudio('sounds/bin_selection.mp3');
+      // play
+      // Audio('sounds/bin_selection.mp3');
     }
     notifyListeners();
-    if (listScanBatch.isEmpty) {
-      // Get.back();
-      playAudio('sounds/Invalid_bin.mp3');
-
-      ///D/Sharmila/verifytapp/assets/sounds/Invalid_bin.mp3
+    if (listScanBatch.isEmpty && checkBin.isEmpty) {
       showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -1150,8 +1298,9 @@ class AuditCtrlProvider extends ChangeNotifier {
                   height: Screens.padingHeight(context) * 0.06,
                   child: ElevatedButton(
                       onPressed: () async {
+                        mycontroller[2].text = '';
                         Get.back();
-                        disableKeyBoard(context);
+                        ItemDetailsState.focus1.requestFocus();
                         notifyListeners();
                       },
                       style: ElevatedButton.styleFrom(
@@ -1217,6 +1366,7 @@ class AuditCtrlProvider extends ChangeNotifier {
     itemCode = '';
     skuCosde = '';
     dispvalList = [];
+    scandata = [];
     scanTime = '';
     mangedBy = '';
     String? whsCode = '';
@@ -1230,14 +1380,12 @@ class AuditCtrlProvider extends ChangeNotifier {
       scanbatchval,
     );
     log('scandatascandata length111::${scandata.length}');
-    // List<LineData> result2 = await driftoperation.getdriftallLineColumn(
-    //     database, columnName, binValues);
-    // List<Map<String, Object?>> result2 =
-    //     await DBOperation.checkBinInAuditLineData(db, columnName, binValues);
     if (lineItemResult.isNotEmpty) {
-      playAudio('sounds/scan_serial_correct.mp3');
+      itemfocus = true;
+      // playAudio('sounds/scan_serial_correct.mp3');
       for (var i = 0; i < lineItemResult.length; i++) {
         itemCode = lineItemResult[i].itemCode!;
+        dispCode = lineItemResult[i].itemDisposition;
         mycontroller[4].text = lineItemResult[i].itemCode!;
         for (var ik = 0; ik < dispAllvalList.length; ik++) {
           if (lineItemResult[i].itemDisposition == dispAllvalList[ik].dispID) {}
@@ -1257,7 +1405,7 @@ class AuditCtrlProvider extends ChangeNotifier {
       // for (int ij = 0; ij < headeItemResult.length; ij++) {
       log('manageby:${headeItemResult[0].manageBy}');
       // if (headeItemResult[0].itemCode == lineItemResult[i].itemCode) {
-      itemCode = headeItemResult[0].itemCode.toString();
+      // itemCode = headeItemResult[0].itemCode.toString();
       skuCosde = headeItemResult[0].sKUCode.toString();
       itemName = headeItemResult[0].itemName.toString();
       dispCode = headeItemResult[0].itemDisposition;
@@ -1287,18 +1435,16 @@ class AuditCtrlProvider extends ChangeNotifier {
         batchIncreaseQty(lineItemResult, 0);
         notifyListeners();
       }
-      List<Checklisttemplate>? dispResult2x;
-
-      int offline = whileOffline == true ? 1 : 0;
-
-      // dispResult2x = await driftoperation.checkListPopup(
-      //     database, scanbatchval, dispCode.toString(), offline, 0);
-      // if (dispResult2x[0].templateid != null) {
-      //   checkListformCreation(context, theme, dispResult2x[0].templateid!);
-      //   notifyListeners();
-      // }
     }
 
+    int offline = whileOffline == true ? 1 : 0;
+
+    // List<Checklisttemplate>? dispResult2x = await driftoperation.checkListPopup(
+    //     database, scanbatchval, dispCode.toString(), offline, 0);
+    // if (dispResult2x[0].templateid != null) {
+    //   checkListformCreation(context, theme, dispResult2x[0].templateid!);
+    //   notifyListeners();
+    // }
     // }
     // driftoperation.insertscanpostdatabase(scandata, database);
     // driftoperation.insertchecklistdatabase(checklistdata, database);
@@ -1309,7 +1455,7 @@ class AuditCtrlProvider extends ChangeNotifier {
     // } else {
     if (lineItemResult.isEmpty) {
       freezeItemCode = false;
-      playAudio('sounds/scan_serial_wrong.mp3');
+      // playAudio('sounds/scan_serial_wrong.mp3');
       if (mycontroller[5].text.isNotEmpty) {
         incQty = int.parse(mycontroller[5].text);
         mycontroller[5].text = (incQty + 1).toString();
@@ -1322,16 +1468,17 @@ class AuditCtrlProvider extends ChangeNotifier {
         }
         notifyListeners();
       } else {
+        String? deviceID = await HelperFunctions.getDeviceIDSharedPreference();
         String uuiDeviceId = uuid.v1();
         mycontroller[5].text = 1.toString();
         notifyListeners();
         scandata.add(ScanDataPost(
             auditid: fetchAuditForDetails.docEntry,
             bincode: mycontroller[2].text,
-            devicecode: fetchAuditForDetails.deviceCode,
+            devicecode: deviceID,
             ismanual: 0,
             itemCode: mycontroller[4].text,
-            notes: '',
+            notes: mycontroller[6].text,
             quantity: double.parse(mycontroller[5].text),
             scandatetime: config.firstDate(),
             serialbatch: scanbatchval,
@@ -1390,6 +1537,9 @@ class AuditCtrlProvider extends ChangeNotifier {
                   height: Screens.padingHeight(context) * 0.06,
                   child: ElevatedButton(
                       onPressed: () async {
+                        // seriesfocus = false;
+                        itemfocus = false;
+
                         Get.back();
                         mycontroller[3].selection = TextSelection(
                           baseOffset: 0,
@@ -1423,9 +1573,7 @@ class AuditCtrlProvider extends ChangeNotifier {
       );
       notifyListeners();
     }
-    if (ConfigController.isScanner == false) {
-      // disableKeyBoard(context);
-    }
+    if (ConfigController.isScanner == false) {}
     notifyListeners();
   }
 
@@ -1437,11 +1585,20 @@ class AuditCtrlProvider extends ChangeNotifier {
       notifyListeners();
     } else {
       if (scandata.isNotEmpty) {
-        playAudio('sounds/next_click.mp3');
-
+        for (var ix = 0; ix < scandata.length; ix++) {
+          if (scandata[ix].serialbatch == serialbtch) {
+            if (scandata[ix].itemCode!.isEmpty) {
+              scandata[ix].itemCode = itemcode;
+            }
+          }
+          notifyListeners();
+        }
         // //D/Sharmila/verifytapp/assets/sounds/next_click.mp3
         await DBOperation.insertscanpostData(db, scandata);
-        await DBOperation.insertchecklistData(db, checklistdata);
+        if (checklistdata.isNotEmpty) {
+          await DBOperation.insertchecklistData(db, checklistdata);
+          notifyListeners();
+        }
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             duration: Duration(seconds: 1),
@@ -1466,7 +1623,12 @@ class AuditCtrlProvider extends ChangeNotifier {
         selectFirstTapVal();
         notifyListeners();
       }
+      disabledBtn = false;
     }
+    await checkNeworkConnectivity(
+      context,
+    );
+    notifyListeners();
   }
 
   callNextBtnMethod(BuildContext context, ThemeData theme, String srialbtchx,
@@ -1480,10 +1642,14 @@ class AuditCtrlProvider extends ChangeNotifier {
     List<Map<String, Object?>> checkScanItem =
         await DBOperation.checkScandata(db, srialbtchx, itemcodex);
     if (scandata.isNotEmpty) {
-      playAudio('sounds/next_click.mp3');
+      // playAudio('sounds/next_click.mp3');
       if (checkScanItem.isEmpty) {
-        await DBOperation.insertscanpostData(db, scandata);
-        await DBOperation.insertchecklistData(db, checklistdata);
+        if (scandata.isNotEmpty) {
+          await DBOperation.insertscanpostData(db, scandata);
+        }
+        if (checklistdata.isNotEmpty) {
+          await DBOperation.insertchecklistData(db, checklistdata);
+        }
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             duration: Duration(seconds: 1),
@@ -1496,6 +1662,7 @@ class AuditCtrlProvider extends ChangeNotifier {
           ),
         );
         notifyListeners();
+        disabledBtn = false;
         mycontroller[3].text = '';
         mycontroller[4].text = '';
         mycontroller[5].text = '';
@@ -1519,6 +1686,7 @@ class AuditCtrlProvider extends ChangeNotifier {
             dismissDirection: DismissDirection.up,
           ),
         );
+        disabledBtn = false;
 
         // }
       }
@@ -1532,18 +1700,19 @@ class AuditCtrlProvider extends ChangeNotifier {
       BuildContext context, ThemeData theme, String binpostdata) async {
     errorMsg = '';
     mycontroller[2].text = binpostdata;
+
     String? deviceId = await HelperFunctions.getDeviceIDSharedPreference();
     BinPostData? binpostDat = BinPostData();
     binpostDat = BinPostData(
         auditid: fetchAuditForDetails.docEntry,
         bincode: binpostdata,
-        devicecode: fetchAuditForDetails.deviceCode,
-        scantime: DateTime.now().toString());
+        devicecode: deviceId,
+        scantime: config.firstDate());
     await BinLockedAPi.getData(binpostDat).then((value) async {
-      log('messagessss');
+      // log('messagessss');
       if (value.stsCode >= 200 && value.stsCode <= 210) {
         isClickedStart = false;
-        log('respDescrespDesc::${value.respDesc}');
+        // log('respDescrespDesc::${value.respDesc}');
         notifyListeners();
       } else if (value.stsCode >= 400 && value.stsCode <= 410) {
         errorMsg = value.exception;
@@ -1566,18 +1735,58 @@ class AuditCtrlProvider extends ChangeNotifier {
   //     }
   //   });
   // }
+  // bool isConnected = false;
+
+  // Future<bool> isNetworkConnected() async {
+  //   late List<ConnectivityResult> result;
+  //   var connectivityResult = await Connectivity().checkConnectivity();
+  //   if (connectivityResult == ConnectivityResult.mobile ||
+  //       connectivityResult == ConnectivityResult.wifi ||
+  //       connectivityResult == ConnectivityResult.ethernet) {
+  //     log('xxxxxxxx');
+  //     return true;
+  //   } else {
+  //     log('yyyyyyyyyyyy');
+  //     return false;
+  //   }
+  // }
+
+  // Future<void> checkConnectivityy(
+  //   BuildContext context,
+  //   ThemeData theme,
+  // ) async {
+  //   isConnected = false;
+  //   bool hasConnected = await isNetworkConnected();
+
+  //   isConnected = hasConnected;
+
+  //   log("isConnectedisConnected::$isConnected");
+
+  //   if (isConnected == true) {
+  //     whileOffline = false;
+  //     callGetAuditApi(context, theme);
+  //     callScannLockedApi(
+  //       context,
+  //       theme,
+  //     );
+  //   } else {
+  //     whileOffline = true;
+  //     await getAuditBydeviceData();
+  //   }
+  //   notifyListeners();
+  // }
+
   checkNeworkConnectivity(
     BuildContext context,
-    ThemeData theme,
   ) async {
-    bool? netbool = await config.haveInterNet();
-    if (netbool == true) {
+    bool? noNetbool = await config.haveNoInterNet();
+    if (noNetbool == false) {
       whileOffline = false;
       callScannLockedApi(
         context,
-        theme,
       );
     } else {
+      log('falseeeee');
       whileOffline = true;
     }
     notifyListeners();
@@ -1586,7 +1795,6 @@ class AuditCtrlProvider extends ChangeNotifier {
   List<AuditScannLogDataModel> auditScannData = [];
   callScannLockedApi(
     BuildContext context,
-    ThemeData theme,
   ) async {
     auditScannData = [];
     errorMsg = '';
@@ -1610,15 +1818,15 @@ class AuditCtrlProvider extends ChangeNotifier {
       // }
       for (var i = 0; i < result2.length; i++) {
         checklistt = [];
-        List<Map<String, Object?>> result3 = await DBOperation.getchecklistData(
-            db, int.parse(result2[i]['Auditid'].toString()));
-        for (var ij = 0; ij < result3.length; ij++) {
-          checklistt.add(DispListData(
-              attachurl: result3[ij]['Attachurl'].toString(),
-              auditid: int.parse(result3[ij]['Auditid'].toString()),
-              checklistcode: result3[ij]['Checklistcode'].toString(),
-              checklistvalue: result3[ij]['Checklistvalue'].toString()));
-        }
+        // List<Map<String, Object?>> result3 = await DBOperation.getchecklistData(
+        //     db, int.parse(result2[i]['Auditid'].toString()));
+        // for (var ij = 0; ij < result3.length; ij++) {
+        //   checklistt.add(DispListData(
+        //       attachurl: result3[ij]['Attachurl'].toString(),
+        //       auditid: int.parse(result3[ij]['Auditid'].toString()),
+        //       checklistcode: result3[ij]['Checklistcode'].toString(),
+        //       checklistvalue: result3[ij]['Checklistvalue'].toString()));
+        // }
         scandatax.add(ScanDataPost(
             auditid: int.parse(result2[i]['Auditid'].toString()),
             bincode: result2[i]['Bincode'].toString(),
@@ -1632,7 +1840,9 @@ class AuditCtrlProvider extends ChangeNotifier {
             scandatetime: result2[i]['Scandatetime'].toString(),
             serialbatch: result2[i]['Serialbatch'].toString(),
             stockstatus: result2[i]['Stockstatus'].toString(),
-            templateid: int.parse(result2[i]['Templateid'].toString()),
+            templateid: result2[i]['Templateid'] != null
+                ? int.parse(result2[i]['Templateid'].toString())
+                : 0,
             scanguid: result2[i]['scanguid'].toString(),
             whscode: result2[i]['Whscode'].toString(),
             checklist: checklistt));
@@ -1646,6 +1856,9 @@ class AuditCtrlProvider extends ChangeNotifier {
           //   await DBOperation.getDeletechecklistData(
           //       db, int.parse(result3[ij]['Auditid'].toString()));
           // }
+          await DBOperation.insertPushedscanpostData(db, scandatax);
+          await DBOperation.getpushedscandataData(db);
+
           for (var i = 0; i < result2.length; i++) {
             await DBOperation.getDeleteScanlistData(
               db,
@@ -1694,18 +1907,21 @@ class AuditCtrlProvider extends ChangeNotifier {
   int incQty = 0;
   bool isManualtype = false;
   bool whileOffline = false;
+  bool seriesfocus = true;
+  bool itemfocus = true;
 
-  addscanneddata(List<LineData> lineItemResult, int i) {
+  addscanneddata(List<LineData> lineItemResult, int i) async {
     String uuiDeviceId = uuid.v1();
+    String? deviceID = await HelperFunctions.getDeviceIDSharedPreference();
 
-    log('checklistdatachecklistdata::${uuiDeviceId.toString()}');
+    log('uuiDeviceIduuiDeviceId::${uuiDeviceId.toString()}');
     scandata.add(ScanDataPost(
         auditid: fetchAuditForDetails.docEntry,
         bincode: lineItemResult[i].binCode,
-        devicecode: fetchAuditForDetails.deviceCode,
+        devicecode: deviceID,
         ismanual: 0,
         itemCode: lineItemResult[i].itemCode,
-        notes: '',
+        notes: mycontroller[6].text,
         quantity: double.parse(mycontroller[5].text),
         scandatetime: config.firstDate(),
         serialbatch: lineItemResult[i].serailBatch,
@@ -1860,8 +2076,10 @@ class AuditCtrlProvider extends ChangeNotifier {
 
   splitAuditJob() {
     log('getAuditListgetAuditList::${getAuditList.length}');
+    errorMsg = '';
     if (getAuditList.isNotEmpty) {
       for (var i = 0; i < getAuditList.length; i++) {
+        log('NNNNNNNNNNNNNNNNN::${getAuditList[i].status}');
         // log("getAuditList[i].status::${getAuditList[i].status}");
         if (getAuditList[i].status == 'Open' ||
             getAuditList[i].status == 'Starting' ||
@@ -1954,6 +2172,7 @@ class AuditCtrlProvider extends ChangeNotifier {
         }
       }
     }
+    log('FFFFFFFFFFFFFFFFFFF:${completedAuditList.length}');
   }
 
   // auditDataMethod() {
@@ -2141,33 +2360,6 @@ class AuditCtrlProvider extends ChangeNotifier {
                         ),
                       ],
                     ),
-
-                    // Row(
-                    //   children: [
-                    //     ElevatedButton(
-                    //         style: ElevatedButton.styleFrom(
-                    //             shape: RoundedRectangleBorder(
-                    //                 borderRadius: BorderRadius.circular(8)),
-                    //             foregroundColor: Colors.white,
-                    //             backgroundColor: theme.primaryColor),
-                    //         onPressed: () {
-                    //           Get.back();
-                    //         },
-                    //         child: const Text('Cancel')),
-                    //     ElevatedButton(
-                    //         style: ElevatedButton.styleFrom(
-                    //             shape: RoundedRectangleBorder(
-                    //                 borderRadius: BorderRadius.circular(8)),
-                    //             foregroundColor: Colors.white,
-                    //             backgroundColor: theme.primaryColor),
-                    //         onPressed: () {
-                    //   Get.back();
-                    //   callGetAuditActionApi(
-                    //       context, theme, actionName, docEntry, indx);
-                    // },
-                    //         child: const Text('Ok')),
-                    //   ],
-                    // )
                   ])),
             );
           });
@@ -2202,17 +2394,12 @@ class AuditCtrlProvider extends ChangeNotifier {
                               topRight: Radius.circular(8))),
                       width: Screens.width(context),
                       height: Screens.bodyheight(context) * 0.06,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Container(
-                            width: Screens.width(context) * 0.8,
-                            child: Center(
-                                child: Text("Warning",
-                                    style: theme.textTheme.bodyLarge!
-                                        .copyWith(color: Colors.white))),
-                          ),
-                        ],
+                      child: Container(
+                        width: Screens.width(context) * 0.8,
+                        child: Center(
+                            child: Text("Warning",
+                                style: theme.textTheme.bodyLarge!
+                                    .copyWith(color: Colors.white))),
                       ),
                     ),
                     SizedBox(
@@ -2267,9 +2454,12 @@ class AuditCtrlProvider extends ChangeNotifier {
                                 )),
                               ),
                               onPressed: () {
+                                freezeItemCode = false;
                                 Get.back();
+                                openAuditList[indx].isStarting = true;
                                 callGetAuditActionApi(
                                     context, theme, actionName, docEntry, indx);
+                                notifyListeners();
                               },
                               child: const Text(
                                 "Yes",
@@ -2311,7 +2501,7 @@ class AuditCtrlProvider extends ChangeNotifier {
         });
   }
 
-  apiResponseDialog(BuildContext context, ThemeData theme, String apiRes) {
+  void apiResponseDialog(BuildContext context, ThemeData theme, String apiRes) {
     showDialog(
         context: context,
         builder: (BuildContext context) {

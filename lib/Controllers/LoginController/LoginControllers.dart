@@ -10,6 +10,7 @@ import '../../Constant/Configuration.dart';
 import '../../Constant/ConstantRoutes.dart';
 import '../../Constant/ConstantSapValues.dart';
 import '../../Constant/Helper.dart';
+import '../../Constant/LocalUrl/GetLocalUrl.dart';
 import '../../Constant/Screen.dart';
 import '../../DBHelper/DBHelpers.dart';
 import '../../DBHelper/DBOperations.dart';
@@ -22,6 +23,7 @@ import '../../Services/GetDispositionList/GetDispositionListApi.dart';
 import '../../Services/LoginAPI/loginApi.dart';
 import 'package:flutter/services.dart';
 
+import '../../Services/TenentApi/TenentidApi.dart';
 import '../../driftDB/driftTablecreation.dart';
 import '../../driftDB/driftoperation.dart';
 
@@ -31,12 +33,13 @@ class LoginController extends ChangeNotifier {
   // }
   List<TextEditingController> mycontroller =
       List.generate(20, (i) => TextEditingController());
-  List<GlobalKey<FormState>> formkey =
-      List.generate(20, (i) => GlobalKey<FormState>());
+  List<GlobalKey<FormState>> formkeys =
+      List.generate(50, (i) => GlobalKey<FormState>());
   bool isloading = false;
   bool progrestext = false;
   bool erroMsgVisble = false;
   bool settingError = false;
+
   Future<SharedPreferences> pref = SharedPreferences.getInstance();
 
   static String errorMsh = '';
@@ -59,16 +62,16 @@ class LoginController extends ChangeNotifier {
     final pref2 = await pref;
 
     notifyListeners();
-    if (formkey[1].currentState!.validate()) {
+    if (formkeys[1].currentState!.validate()) {
       await pref2.setString(
         'tenantId',
         mycontroller[3].text.toString(),
       );
+      callGetTenentIdApi(context);
       progrestext = true;
       errorMsh = "";
       erroMsgVisble = false;
       settingError = false;
-      // setURL();
       progrestext = false;
       notifyListeners();
       Navigator.pop(context);
@@ -76,7 +79,6 @@ class LoginController extends ChangeNotifier {
   }
 
   init() {
-    log('LoginController.errorMshLoginController.errorMsh:${SplashScreenpageState.erroMsgg}');
     if (mycontroller[3].text.isEmpty && errorMsh.isEmpty) {
       errorMsh = "Complete the setup..!!";
       notifyListeners();
@@ -125,8 +127,12 @@ class LoginController extends ChangeNotifier {
     });
   }
 
+//   final firebaseMessaging = FirebaseMessaging.instance;
+//  Future<String?> getToken() async {
+//     return await firebaseMessaging.getToken();
+//   }
   validateMethod(BuildContext context) async {
-    if (formkey[0].currentState!.validate()) {
+    if (formkeys[0].currentState!.validate()) {
       if (mycontroller[3].text.toString().trim().isEmpty) {
         errorMsh = "Complete the setup..!!";
       } else {
@@ -244,6 +250,64 @@ class LoginController extends ChangeNotifier {
         });
       }
     }
+  }
+
+  callGetTenentIdApi(BuildContext context) {
+    String? customerid = "";
+    String? stocksnap = "";
+
+    TenantIdApi.getData(mycontroller[3].text).then((value) async {
+      if (value.stcode! >= 200 && value.stcode! <= 210) {
+        if (value.customeridUrl != null) {
+          customerid = value.customeridUrl;
+          stocksnap = value.stocksnapUrl;
+          print("url method::" + customerid.toString());
+          await HelperFunctions.saveHostSP(customerid!.trim());
+          await HelperFunctions.saveStockHostSP(stocksnap!.trim());
+          await HelperFunctions.saveTenetIDSharedPreference(
+              mycontroller[3].text.toString().trim());
+          setURL();
+          errorMsh = "";
+          erroMsgVisble = false;
+          settingError = false;
+          notifyListeners();
+        }
+      } else if (value.stcode! >= 400 && value.stcode! <= 410) {
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Check Your Internet..!!'),
+          backgroundColor: Colors.red,
+          elevation: 10,
+          behavior: SnackBarBehavior.floating,
+          margin: EdgeInsets.all(5),
+          dismissDirection: DismissDirection.up,
+        ));
+      }
+    });
+  }
+
+  setURL() async {
+    String? getCustUrl = await HelperFunctions.getHostDSP();
+    String? getStockUrl = await HelperFunctions.getStockHostDSP();
+
+    log('getStockUrlget:$getStockUrl');
+    String hostip = '';
+    if (getCustUrl != null) {
+      for (int i = 0; i < getCustUrl.length; i++) {
+        if (getCustUrl[i] == ":") {
+          break;
+        }
+        // log("for ${hostip}");
+        hostip = hostip + getCustUrl[i];
+      }
+    }
+
+    // log("for last ${hostip}");
+    // HelperFunctions.saveHostSP(hostip);
+    // ConstantValues.userNamePM = await HelperFunctions.getUserName();
+    Url.queryApi = "${getCustUrl.toString()}/api/";
+    Url.stockSnapApi = "${getStockUrl.toString()}/api/";
+    log('  Url.queryApi Url.queryApi::${Url.queryApi}:::stockSnapApi::${Url.stockSnapApi}');
   }
 
   apiResponseDialog(BuildContext context, ThemeData theme, String apiRes) {

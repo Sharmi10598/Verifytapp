@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -18,15 +19,29 @@ class ItemDetails extends StatefulWidget {
   ItemDetails({super.key, required this.title});
   String title;
   @override
-  State<ItemDetails> createState() => _ItemDetailsState();
+  State<ItemDetails> createState() => ItemDetailsState();
 }
 
-class _ItemDetailsState extends State<ItemDetails> with WidgetsBindingObserver {
+class ItemDetailsState extends State<ItemDetails> with WidgetsBindingObserver {
   bool bincodeScan = false;
   bool batchCodeScan = false;
   bool itemCodeScan = false;
   bool bincode = false;
+  bool disputeval = false;
+  int? groupValueSelected = 0;
+  List<bool> isSelected = [
+    false,
+    false,
+  ];
+  int? get getgroupValueSelected => groupValueSelected;
+  groupSelectvalue(int i) {
+    setState(() {
+      groupValueSelected = i;
+    });
+  }
 
+  static FocusNode focus1 = FocusNode();
+  static FocusNode focus2 = FocusNode();
   static const platform = MethodChannel('com.buson.verifytapp/time');
   String _networkTimeStatus = 'Unknown';
   Future<void> _openDateTimeSettings() async {
@@ -67,6 +82,7 @@ class _ItemDetailsState extends State<ItemDetails> with WidgetsBindingObserver {
         // );
       } else if (_networkTimeStatus == 'Disabled') {
         showDialog(
+            barrierDismissible: false,
             context: context,
             builder: (context) {
               return AlertDialog(
@@ -112,13 +128,21 @@ class _ItemDetailsState extends State<ItemDetails> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     callTimeEnableMethod();
-    // context.read<AuditCtrlProvider>().mycontroller[3].text = '';
-    // context.read<AuditCtrlProvider>().mycontroller[4].text = '';
+    context.read<AuditCtrlProvider>().checkNeworkConnectivity(context);
+
+    if (context.read<AuditCtrlProvider>().mycontroller[2].text.isNotEmpty) {
+      log('ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ');
+      focus2.requestFocus();
+    } else {
+      focus1.requestFocus();
+      focus2.unfocus();
+    }
   }
 
-  @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    // _firstFocusNode.dispose();
+    // _secondFocusNode.dispose();
     super.dispose();
   }
 
@@ -218,9 +242,6 @@ class _ItemDetailsState extends State<ItemDetails> with WidgetsBindingObserver {
                         child: const Text("Clear"))
                   ],
                 ),
-
-                // today only working for desings and api's functionality for bin scanning page and Audit actions page sir,
-                // tomorrow will be complete local tables and other configurations
                 SizedBox(
                   height: Screens.bodyheight(context) * 0.015,
                 ),
@@ -232,9 +253,40 @@ class _ItemDetailsState extends State<ItemDetails> with WidgetsBindingObserver {
                         color: Colors.white,
                         alignment: Alignment.center,
                         child: TextFormField(
+                          onChanged: (_) {},
                           controller: context
                               .watch<AuditCtrlProvider>()
                               .mycontroller[2],
+                          // autofocus: true,
+                          focusNode: focus1,
+                          autofocus: context
+                                  .read<AuditCtrlProvider>()
+                                  .mycontroller[2]
+                                  .text
+                                  .isNotEmpty
+                              ? false
+                              : true,
+                          onEditingComplete: () {
+                            context.read<AuditCtrlProvider>().afterScanbinCode(
+                                context,
+                                theme,
+                                'BinCode',
+                                context
+                                    .read<AuditCtrlProvider>()
+                                    .mycontroller[2]
+                                    .text);
+                            if (context
+                                .read<AuditCtrlProvider>()
+                                .mycontroller[2]
+                                .text
+                                .isNotEmpty) {
+                              log('ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ222222222222222222222');
+                              focus2.requestFocus();
+                            } else {
+                              // focus1.requestFocus();
+                              // focus2.unfocus();
+                            }
+                          },
                           onTap: () {
                             context
                                     .read<AuditCtrlProvider>()
@@ -256,19 +308,7 @@ class _ItemDetailsState extends State<ItemDetails> with WidgetsBindingObserver {
                                   .length,
                             );
                           },
-                          onEditingComplete: () {
-                            context.read<AuditCtrlProvider>().afterScanbinCode(
-                                context,
-                                theme,
-                                'BinCode',
-                                context
-                                    .read<AuditCtrlProvider>()
-                                    .mycontroller[2]
-                                    .text);
-                            context
-                                .read<AuditCtrlProvider>()
-                                .disableKeyBoard(context);
-                          },
+                          // textInputAction: TextInputAction.next,
                           validator: (value) {
                             if (value!.isEmpty) {
                               return '*Scan Bin';
@@ -352,65 +392,38 @@ class _ItemDetailsState extends State<ItemDetails> with WidgetsBindingObserver {
                             : Colors.grey[300],
                         alignment: Alignment.center,
                         child: TextFormField(
-                          autofocus: context
-                                  .watch<AuditCtrlProvider>()
-                                  .mycontroller[2]
-                                  .text
-                                  .isNotEmpty
-                              ? true
-                              : false,
+                          autofocus: true,
+                          focusNode: focus2,
                           readOnly: context
                                   .watch<AuditCtrlProvider>()
                                   .mycontroller[2]
                                   .text
-                                  .isEmpty
-                              ? true
-                              : false,
+                                  .isNotEmpty
+                              ? false
+                              : true,
+                          // context.watch<AuditCtrlProvider>().seriesfocus ==
+                          //         true
+                          //     ? true
+                          //     : false,
                           controller: context
                               .watch<AuditCtrlProvider>()
                               .mycontroller[3],
-                          onTap: () {
-                            context
-                                    .read<AuditCtrlProvider>()
-                                    .mycontroller[3]
-                                    .text =
-                                context
-                                    .read<AuditCtrlProvider>()
-                                    .mycontroller[3]
-                                    .text;
-                            context
+                          onChanged: (value) {
+                            if (context
                                 .read<AuditCtrlProvider>()
                                 .mycontroller[3]
-                                .selection = TextSelection(
-                              baseOffset: 0,
-                              extentOffset: context
+                                .text
+                                .isEmpty) {
+                              context
                                   .read<AuditCtrlProvider>()
-                                  .mycontroller[3]
-                                  .text
-                                  .length,
-                            );
-
-                            // context
-                            //         .read<AuditCtrlProvider>()
-                            //         .mycontroller[3]
-                            //         .text =
-                            //     context
-                            //         .read<AuditCtrlProvider>()
-                            //         .mycontroller[3]
-                            //         .text;
-                            // context
-                            //     .read<AuditCtrlProvider>()
-                            //     .mycontroller[3]
-                            //     .selection = TextSelection(
-                            //   baseOffset: 0,
-                            //   extentOffset: context
-                            //       .read<AuditCtrlProvider>()
-                            //       .mycontroller[3]
-                            //       .text
-                            //       .length,
-                            // );
+                                  .mycontroller[4]
+                                  .text = '';
+                              context
+                                  .read<AuditCtrlProvider>()
+                                  .mycontroller[5]
+                                  .text = '';
+                            }
                           },
-                          onChanged: (value) {},
                           onEditingComplete: () async {
                             if (context
                                 .read<AuditCtrlProvider>()
@@ -440,9 +453,6 @@ class _ItemDetailsState extends State<ItemDetails> with WidgetsBindingObserver {
                                   .text
                                   .length,
                             );
-                            if (ConfigController.isScanner == false) {
-                              // FocusScope.of(context).unfocus();
-                            }
                           },
                           validator: (value) {
                             if (value!.isEmpty) {
@@ -450,6 +460,28 @@ class _ItemDetailsState extends State<ItemDetails> with WidgetsBindingObserver {
                             }
                             return null;
                           },
+                          onTap: () {
+                            context
+                                    .read<AuditCtrlProvider>()
+                                    .mycontroller[3]
+                                    .text =
+                                context
+                                    .read<AuditCtrlProvider>()
+                                    .mycontroller[3]
+                                    .text;
+                            context
+                                .read<AuditCtrlProvider>()
+                                .mycontroller[3]
+                                .selection = TextSelection(
+                              baseOffset: 0,
+                              extentOffset: context
+                                  .read<AuditCtrlProvider>()
+                                  .mycontroller[3]
+                                  .text
+                                  .length,
+                            );
+                          },
+                          textInputAction: TextInputAction.next,
                           decoration: InputDecoration(
                             suffixIcon: ConfigController.isScanner == true
                                 ? null
@@ -507,12 +539,11 @@ class _ItemDetailsState extends State<ItemDetails> with WidgetsBindingObserver {
                             : Colors.grey[300],
                         alignment: Alignment.center,
                         child: TextFormField(
-                          readOnly: context
-                                      .watch<AuditCtrlProvider>()
-                                      .freezeItemCode ==
-                                  true
-                              ? true
-                              : false,
+                          readOnly:
+                              context.watch<AuditCtrlProvider>().itemfocus ==
+                                      true
+                                  ? true
+                                  : false,
                           onTap: () {
                             if (context
                                 .read<AuditCtrlProvider>()
@@ -677,36 +708,203 @@ class _ItemDetailsState extends State<ItemDetails> with WidgetsBindingObserver {
                           ),
                         ),
                       ),
+                      SizedBox(
+                        height: Screens.bodyheight(context) * 0.01,
+                      ),
+                      // Transform.scale(
+                      //   scale: 1,
+                      //   child:
+
+                      context.watch<AuditCtrlProvider>().dispvalList.isNotEmpty
+                          ? Container(
+                              child: Wrap(
+                                  spacing: 5.0, // width
+                                  runSpacing: 10.0, // height
+                                  children: context
+                                      .watch<AuditCtrlProvider>()
+                                      .listContainersCustomertags(
+                                        theme,
+                                        context,
+                                      )),
+                            )
+                          // ? Container(
+                          //     // color: Colors.white,
+                          //     child: Center(
+                          //       child: Wrap(
+                          //           spacing: 5.0, // width
+                          //           runSpacing: 10.0, // height
+                          //           children: context
+                          //               .read<AuditCtrlProvider>()
+                          //               .listContainersCustomertags(theme, context)),
+                          //     ),
+                          //   )
+                          : Container(),
+                      SizedBox(
+                        height: Screens.bodyheight(context) * 0.02,
+                      ),
+                      Container(
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: EdgeInsets.only(
+                                  left: Screens.width(context) * 0.03),
+                              child: Text(
+                                'Dispute',
+                                style: theme.textTheme.bodyLarge
+                                    ?.copyWith(color: Colors.black),
+                              ),
+                            ),
+                            SizedBox(
+                              width: Screens.width(context) * 0.03,
+                            ),
+                            Container(
+                              height: Screens.padingHeight(context) * 0.05,
+                              child: CupertinoSlidingSegmentedControl<int>(
+                                backgroundColor: Colors.grey,
+                                padding: EdgeInsets.all(0),
+                                thumbColor: theme.primaryColor,
+                                groupValue: groupValueSelected,
+                                children: {
+                                  0: Container(
+                                    alignment: Alignment.center,
+                                    width: Screens.width(context) * 0.15,
+                                    padding: EdgeInsets.symmetric(
+                                        vertical: 7, horizontal: 5),
+                                    // height: Screens.bodyheight(context) * 0.05,
+                                    child: Text(
+                                      'No',
+                                      style: theme.textTheme.bodyLarge
+                                          ?.copyWith(
+                                              fontWeight: FontWeight.w500,
+                                              color: Colors.white),
+                                    ),
+                                  ),
+                                  1: Container(
+                                    alignment: Alignment.center,
+                                    width: Screens.width(context) * 0.15,
+                                    padding: EdgeInsets.symmetric(
+                                        vertical: 7, horizontal: 5),
+                                    // height: Screens.bodyheight(context) * 0.05,
+                                    child: Text(
+                                      'Yes',
+                                      style: theme.textTheme.bodyLarge
+                                          ?.copyWith(
+                                              fontWeight: FontWeight.w500,
+                                              color: Colors.white),
+                                    ),
+                                  ),
+                                },
+                                onValueChanged: (v) {
+                                  setState(() {
+                                    groupSelectvalue(v!);
+                                    print(v);
+                                  });
+                                },
+                              ),
+                            )
+                            // Switch(
+                            //   value: disputeval,
+                            //   onChanged: (value) {
+                            //     setState(() {
+                            //       disputeval =
+                            //           value; //update value when sitch changed
+                            //     });
+                            //   },
+                            // ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(
+                        height: Screens.bodyheight(context) * 0.01,
+                      ),
+                      groupValueSelected == 1
+                          ? Container(
+                              // height: Screens.padingHeight(context),
+                              color: context
+                                      .watch<AuditCtrlProvider>()
+                                      .mycontroller[2]
+                                      .text
+                                      .isNotEmpty
+                                  ? Colors.white
+                                  : Colors.grey[300],
+                              alignment: Alignment.center,
+                              child: TextFormField(
+                                controller: context
+                                    .watch<AuditCtrlProvider>()
+                                    .mycontroller[6],
+                                onTap: () {
+                                  // if (context
+                                  //     .read<AuditCtrlProvider>()
+                                  //     .formkey[2]
+                                  //     .currentState!
+                                  //     .validate()) {
+                                  //   context
+                                  //           .read<AuditCtrlProvider>()
+                                  //           .mycontroller[6]
+                                  //           .text =
+                                  //       context
+                                  //           .read<AuditCtrlProvider>()
+                                  //           .mycontroller[6]
+                                  //           .text;
+                                  //   context
+                                  //       .read<AuditCtrlProvider>()
+                                  //       .mycontroller[6]
+                                  //       .selection = TextSelection(
+                                  //     baseOffset: 0,
+                                  //     extentOffset: context
+                                  //         .read<AuditCtrlProvider>()
+                                  //         .mycontroller[6]
+                                  //         .text
+                                  //         .length,
+                                  //   );
+                                  // }
+                                },
+                                validator: (value) {
+                                  if (value!.isEmpty) {
+                                    return '* Notes';
+                                  }
+                                  return null;
+                                },
+                                maxLength: 1000,
+                                decoration: InputDecoration(
+                                  counterText: '',
+                                  contentPadding: EdgeInsets.symmetric(
+                                      horizontal: Screens.width(context) * 0.03,
+                                      vertical:
+                                          Screens.fullHeight(context) * 0.01),
+                                  labelText: 'Notes',
+                                  labelStyle: theme.textTheme.bodyLarge
+                                      ?.copyWith(color: Colors.grey),
+                                  focusedBorder: const OutlineInputBorder(
+                                    // borderRadius: BorderRadius.circular(25),
+                                    borderSide:
+                                        BorderSide(color: Colors.black54),
+                                  ),
+                                  enabledBorder: const OutlineInputBorder(
+                                    // borderRadius: BorderRadius.circular(25),
+                                    borderSide: BorderSide(
+                                        width: 1, color: Colors.black54),
+                                  ),
+                                  focusedErrorBorder: const OutlineInputBorder(
+                                    // borderRadius: BorderRadius.circular(25),
+                                    borderSide:
+                                        BorderSide(color: Colors.black54),
+                                  ),
+                                  errorBorder: const OutlineInputBorder(
+                                    // borderRadius: BorderRadius.circular(25),
+                                    borderSide:
+                                        BorderSide(color: Colors.black54),
+                                  ),
+                                ),
+                              ),
+                            )
+                          : Container(),
                     ],
                   ),
                 ),
                 SizedBox(
                   height: Screens.padingHeight(context) * 0.02,
                 ),
-                context.watch<AuditCtrlProvider>().dispvalList.isNotEmpty
-                    ? Container(
-                        child: Wrap(
-                            spacing: 5.0, // width
-                            runSpacing: 10.0, // height
-                            children: context
-                                .watch<AuditCtrlProvider>()
-                                .listContainersCustomertags(
-                                  theme,
-                                  context,
-                                )),
-                      )
-                    // ? Container(
-                    //     // color: Colors.white,
-                    //     child: Center(
-                    //       child: Wrap(
-                    //           spacing: 5.0, // width
-                    //           runSpacing: 10.0, // height
-                    //           children: context
-                    //               .read<AuditCtrlProvider>()
-                    //               .listContainersCustomertags(theme, context)),
-                    //     ),
-                    //   )
-                    : Container(),
                 SizedBox(
                   height: Screens.bodyheight(context) * 0.02,
                 ),
@@ -753,7 +951,6 @@ class _ItemDetailsState extends State<ItemDetails> with WidgetsBindingObserver {
                     ],
                   ),
                 ),
-
                 SizedBox(
                   height: Screens.padingHeight(context) * 0.07,
                 ),
@@ -782,6 +979,7 @@ class _ItemDetailsState extends State<ItemDetails> with WidgetsBindingObserver {
                       .formkey[3]
                       .currentState!
                       .validate()) {
+                context.read<AuditCtrlProvider>().disabledBtn = true;
                 context.read<AuditCtrlProvider>().checknextbtn(
                     context,
                     theme,

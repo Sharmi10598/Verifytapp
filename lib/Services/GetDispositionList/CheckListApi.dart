@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'package:http/http.dart' as http;
 import '../../Constant/ConstantSapValues.dart';
+import '../../Constant/LocalUrl/GetLocalUrl.dart';
 import '../../Model/CheckListModel/CheckLstModel.dart';
 
 class CheckListtApi {
@@ -11,10 +12,9 @@ class CheckListtApi {
     int resCode = 500;
 
     try {
-      log('ConstantValues.token::${ConstantValues.token}');
+      // log('ConstantValues.token::${ConstantValues.token}');
       final response = await http.get(
-        Uri.parse(
-            "http://91.203.133.224:92/api/WareSmart/v1/GetAllChecklistTemplate"),
+        Uri.parse(Url.queryApi + "WareSmart/v1/GetAllChecklistTemplate"),
         headers: {
           "Content-Type": "application/json",
           "Authorization": 'bearer ' + ConstantValues.token,

@@ -19,7 +19,7 @@ class _LoginBodyPageState extends State<LoginBodyPage> {
 
     return Container(
       child: Form(
-        key: context.read<LoginController>().formkey[0],
+        key: context.read<LoginController>().formkeys[0],
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -56,7 +56,7 @@ class _LoginBodyPageState extends State<LoginBodyPage> {
                 controller: context.read<LoginController>().mycontroller[0],
                 validator: (value) {
                   if (value!.isEmpty) {
-                    return 'Enter The Username';
+                    return 'Enter Username';
                   }
                   return null;
                 },
@@ -64,7 +64,7 @@ class _LoginBodyPageState extends State<LoginBodyPage> {
                   contentPadding: EdgeInsets.symmetric(
                       horizontal: Screens.width(context) * 0.03,
                       vertical: Screens.fullHeight(context) * 0.01),
-                  labelText: 'Username',
+                  labelText: 'User Code',
                   labelStyle: theme.textTheme.bodyMedium
                       ?.copyWith(color: Colors.black54),
                   focusedBorder: OutlineInputBorder(
@@ -100,7 +100,7 @@ class _LoginBodyPageState extends State<LoginBodyPage> {
               child: TextFormField(
                 validator: (value) {
                   if (value!.isEmpty) {
-                    return 'Enter The Password';
+                    return 'Enter Password';
                   }
                   return null;
                 },
@@ -145,18 +145,28 @@ class _LoginBodyPageState extends State<LoginBodyPage> {
               child: ElevatedButton(
                   style:
                       ElevatedButton.styleFrom(backgroundColor: Colors.white),
-                  onPressed: () {
-                    setState(() {
-                      context.read<LoginController>().validateMethod(context);
-                    });
-                  },
+                  onPressed: context.read<LoginController>().isloading == true
+                      ? null
+                      : () {
+                          setState(() {
+                            context
+                                .read<LoginController>()
+                                .validateMethod(context);
+                          });
+                        },
                   child: Container(
                       alignment: Alignment.center,
                       height: Screens.fullHeight(context) * 0.055,
                       width: Screens.width(context) * 0.7,
-                      child: Text('Sign In',
-                          style: theme.textTheme.bodyMedium
-                              ?.copyWith(color: Colors.black)))),
+                      child: context.watch<LoginController>().isloading == true
+                          ? Center(
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                              ),
+                            )
+                          : Text('Sign In',
+                              style: theme.textTheme.bodyMedium
+                                  ?.copyWith(color: Colors.black)))),
             ),
             SizedBox(
               height: Screens.fullHeight(context) * 0.015,

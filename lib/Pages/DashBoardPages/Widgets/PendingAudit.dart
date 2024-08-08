@@ -20,7 +20,7 @@ class _PendingAuditsState extends State<PendingAudits> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    context.read<DashBoardCtrlProvider>().callGetAuditApi();
+    context.read<DashBoardCtrlProvider>().checkNeworkConnectivity();
   }
 
   @override

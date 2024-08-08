@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'package:http/http.dart' as http;
 import '../../Constant/ConstantSapValues.dart';
+import '../../Constant/LocalUrl/GetLocalUrl.dart';
 import '../../Model/AuditModel/RescheduleModel.dart';
 
 class GetAuditRescheduleApi {
@@ -12,18 +13,19 @@ class GetAuditRescheduleApi {
     int resCode = 500;
 
     try {
-      log('ConstantValues.token::${ConstantValues.token}');
-      log('http://91.203.133.224:92/api/WareSmart/v1/PostAuditReshedule/$docEntry/$rescheduleDate');
+      // log('ConstantValues.token::${ConstantValues.token}');
+      log(Url.queryApi +
+          'WareSmart/v1/PostAuditReshedule/$docEntry/$rescheduleDate');
       final response = await http.post(
-        Uri.parse(
-            'http://91.203.133.224:92/api/WareSmart/v1/PostAuditReschedule/$docEntry/$rescheduleDate'),
+        Uri.parse(Url.queryApi +
+            'WareSmart/v1/PostAuditReschedule/$docEntry/$rescheduleDate'),
         headers: {
           "accept": "/",
           "Authorization": 'bearer ' + ConstantValues.token,
         },
       );
       log("Reschedule sts:::" "${response.statusCode.toString()}");
-      log("Reschedule Res:::" "${response.body.toString()}");
+      // log("Reschedule Res:::" "${response.body.toString()}");
 
       resCode = response.statusCode;
       if (response.statusCode == 200) {

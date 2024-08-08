@@ -37,25 +37,23 @@ class _AuditingUpComingScreenState extends State<AuditingUpComingScreen> {
               bottom: Screens.padingHeight(context) * 0.07,
             ),
             height: Screens.padingHeight(context) * 0.825,
-            child: context.watch<AuditCtrlProvider>().isLoading == true &&
-                    context.watch<AuditCtrlProvider>().errorMsg.isEmpty &&
-                    context
-                        .watch<AuditCtrlProvider>()
-                        .upcomingtAuditList
-                        .isEmpty
-                ? Center(
-                    child: CircularProgressIndicator(
-                      color: theme.primaryColor,
-                    ),
-                  )
-                : context.watch<AuditCtrlProvider>().isLoading == false &&
-                        context.watch<AuditCtrlProvider>().errorMsg.isEmpty &&
-                        context
-                            .watch<AuditCtrlProvider>()
-                            .upcomingtAuditList
-                            .isEmpty
+            child:
+                //  context.watch<AuditCtrlProvider>().isLoading == true &&
+                //         context.watch<AuditCtrlProvider>().errorMsg.isEmpty &&
+                //         context
+                //             .watch<AuditCtrlProvider>()
+                //             .upcomingtAuditList
+                //             .isEmpty
+                //     ? Center(
+                //         child: CircularProgressIndicator(
+                //           color: theme.primaryColor,
+                //         ),
+                //       )
+                //     : context.watch<AuditCtrlProvider>().isLoading == false &&
+                //             context.watch<AuditCtrlProvider>().errorMsg.isEmpty &&
+                context.watch<AuditCtrlProvider>().upcomingtAuditList.isEmpty
                     ? Container(
-                        child: Center(child: Text('No Data..')),
+                        child: Center(child: Text('No Data..!!')),
                       )
                     : ListView.builder(
                         padding: EdgeInsets.all(0),

@@ -21,7 +21,7 @@ class GetAuditActionModel {
   factory GetAuditActionModel.fromJson(dynamic json, int statuzCode) {
     // Map<String, dynamic>
     if (statuzCode == 200) {
-      log('message::XXXXXXXXXXXXXXX111');
+      // log('message::XXXXXXXXXXXXXXX111');
       // var list = jsonDecode(json['data']) as List;
       // List<GetAuditActionMainDataModel> dataList = list
       //     .map((data) => GetAuditActionMainDataModel.fromJson(data))
@@ -101,28 +101,28 @@ class GetAuditActionMainDataModel {
   factory GetAuditActionMainDataModel.fromJson(
     Map<String, dynamic> jsons,
   ) {
-    log("message::XXXXXXXXXXXXXXX2222");
+    // log("message::XXXXXXXXXXXXXXX2222");
     var headerList = jsons['Head'] as List;
     List<HeaderData> headerDataList =
         headerList.map((data) => HeaderData.fromJson(data)).toList();
-    log('headerDataListheaderDataList::${headerDataList.length}');
+    // log('headerDataListheaderDataList::${headerDataList.length}');
     var list = jsons['Line'] as List;
     List<LineData> lineDataList =
         list.map((data) => LineData.fromJson(data)).toList();
 
-    log('lineDataListlineDataListlineDataListlineDataList::${lineDataList.length}');
+    // log('lineDataListlineDataListlineDataListlineDataList::${lineDataList.length}');
     List<BinMasterData> binDataList = [];
     // log("message::XXXXXXXXXXXXXXX333333333333333:::${jsons['Bin'].toString()}");
-    log("message::XXXXXXXXXXXXXXX44444");
+    // log("message::XXXXXXXXXXXXXXX44444");
 
     if (jsons['Bin'].toString() == "[]") {
-      log("message::XXXXXXXXXXXXXXX4555");
+      // log("message::XXXXXXXXXXXXXXX4555");
     } else {
-      log("message::XXXXXXXXXXXXXXX6666");
+      // log("message::XXXXXXXXXXXXXXX6666");
       var binList = jsons['Bin'] as List;
       binDataList =
           binList.map((data) => BinMasterData.fromJson(data)).toList();
-      log('binDataListbinDataList::${binDataList[0].auditId}');
+      // log('binDataListbinDataList::${binDataList[0].auditId}');
     }
 
     return GetAuditActionMainDataModel(
@@ -225,16 +225,6 @@ class HeaderData {
     required this.updatedDateTime,
     required this.traceid,
   });
-//  {\"AuditSchedule_ID\":26,\"Id\":57,\"ItemName\":\"TVC GIFT SS UTENSIL FLASK\",\"ItemCode\":\".SS UTENSIL FLASK\",\"ItemType\":null,
-// \"Brand\":\"TVC\",
-//\"Category\":\"SA\",\"SubCategory\":\"GIFT\",\"ItemDescription\":null,\"ModelNo\":null,\"PartCode\":null,\"SKUCode\":null,\"BrandCode\":null,
-//\"ItemGroup\":null,
-//\"Specification\":null,\"SizeCapacity\":null,\"Color\":null,\"Clasification\":null,\"UoM\":null,\"Length\":null,\"Width\":null,\"Height\":null,
-//\"Weight\":null,
-//\"Volume\":null,\"InwardUoM\":null,\"InwardPackQty\":null,\"OutwardUoM\":null,\"OutwardPackQty\":null,\"isPerishable\":null,\"hasExpiryDate\":null,
-//\"ExpiryDays\":null,\"isFragile\":null,\"TaxRate\":null,\"TextNote\":null,\"MovingType\":null,\"ManageBy\":\"B\",\"ImageURL\":null,
-//\"Status\":\"Active\",\"CreatedBy\":1,\"CreatedDateTime\":\"2024-07-11T18:37:32.033\",\"UpdatedBy\":\"1\",\"UpdatedDateTime\":null,
-//\"traceid\":\"26344002-95fc-4ee6-a0e2-f6f2cceb0527\"},
 
   factory HeaderData.fromJson(Map<String, dynamic> jsons) {
     // log("gggg::" + jsons.length.toString() + "hhh" + jsons['Id'].toString());
@@ -335,12 +325,8 @@ class HeaderData {
       };
 }
 
-// {"respType":"success","respCode":"WS100","respDesc":"Operation completed successfully","data":"
-//{ \"Head\":[],\"Line\":[{\"AutoID\":370665,\"ScheduleID\":11,\"WhsCode\":\"W001\",\"ItemCode\":\"001@\",\"BinCode\":\"B011\",\"SerailBatch\":\"S00001-3\",\"Quantity\":1.00,
-//\"UoM\":null,\"CreatedBy\":5,\"CreatedDatetime\":\"2024-07-23T12:31:13.98\",\"UpdatedBy\":null,\"UpdatedDatetime\":null,\"traceid\":\"a87bc362-b243-4dd4-8a13-68a7ac5b2ac0\"},
-//{\"AutoID\":370666,\"ScheduleID\":11,\"WhsCode\":\"W001\",\"ItemCode\":\"002 DRESSING TABLE\",\"BinCode\":\"B04\",\"SerailBatch\":\"S00002DRESSINGTABLE-3\",\"Quantity\":1.00,
-//\"UoM\":null,\"CreatedBy\":5,\"CreatedDatetime\":\"2024-07-23T12:31:13.98\",\"UpdatedBy\":null,\"UpdatedDatetime\":null,\"traceid\":\"a87bc362-b243-4dd4-8a13-68a7ac5b2ac0\"},
-
+// {\"AutoID\":40446065,\"ScheduleID\":79,\"WhsCode\":\"W001\",\"ItemCode\":\"71226\",\"BinCode\":\"B06\",\"SerailBatch\":\"S0071226-3\",
+// \"AltSerialBatch\":null,\"Quantity\":1.00,\"StockStatus\":null,\"UoM\":null,\"CreatedBy\":5,\"CreatedDatetime\":\"2024-08-06T16:40:46.19\",\"UpdatedBy\":null,\"UpdatedDatetime\":null,\"traceid\":\"aa59d8ce-110a-4047-a534-0f29976acbb5\",\"DispID\":1,\"InDate\":\"2024-08-06T00:00:00\",\"ExpDate\":\"2030-01-27T00:00:00\"}
 class LineData {
   int? autoId;
   int? scheduleId;
@@ -348,6 +334,7 @@ class LineData {
   String? itemCode;
   String? binCode;
   String? serailBatch;
+  String? altSerialBatch;
   double? quantity;
   String? inDate;
   String? expDate;
@@ -364,6 +351,7 @@ class LineData {
       this.itemDisposition,
       this.createdBy,
       this.inDate,
+      required this.altSerialBatch,
       this.expDate,
       this.createdDatetime,
       this.itemCode,
@@ -376,14 +364,12 @@ class LineData {
       this.updatedDatetime,
       this.whsCode});
   factory LineData.fromJson(Map<String, dynamic> jsons) {
-    //  {\"AutoID\":21313115,\"ScheduleID\":26,\"WhsCode\":\"W001\",\"ItemCode\":\"Y71 GOLD\",\"BinCode\":\"B06\",\"SerailBatch\":\"S00Y71GOLD-H\",\"Quantity\":1.00,
-    // \"UoM\":null,\"CreatedBy\":5,\"CreatedDatetime\":\"2024-08-02T12:43:18.39\",\"UpdatedBy\":null,\"UpdatedDatetime\":null,
-    // \"traceid\":\"5387e438-d72a-4591-b178-6fdd2c5ed2a3\",\"DispID\":3,\"InDate\":\"2024-08-02T00:00:00\",\"ExpDate\":\"2030-01-23T00:00:00\"}
     return LineData(
         autoId: jsons['AutoID'] ?? 0,
         binCode: jsons['BinCode'] ?? '',
         inDate: jsons['InDate'] ?? '',
         expDate: jsons['ExpDate'] ?? '',
+        altSerialBatch: jsons['AltSerialBatch'] ?? '',
         createdBy: jsons['CreatedBy'] ?? 0,
         createdDatetime: jsons['CreatedDatetime'] ?? '',
         itemCode: jsons['ItemCode'] ?? '',
@@ -434,7 +420,7 @@ class BinMasterData {
 // {\"AuditID\":26,\"BinCode\":\"WC001\",\"WhsCode\":\"W001\",\"AreaCode\":\"AC1234\",\"ZoneCode\":\"Zone12345\",\"RackCode\":\"RK8005\",\"Status\":1}
 
   factory BinMasterData.fromJson(Map<String, dynamic> jsons) {
-    log('NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN');
+    // log('NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN');
     return BinMasterData(
         areaCode: jsons['AreaCode'] != null ? jsons['AreaCode'].toString() : '',
         auditId: jsons['AuditID'] ?? 0,

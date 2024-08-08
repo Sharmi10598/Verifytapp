@@ -23,7 +23,7 @@ class AuditScannLogModel {
       var list = jsonDecode(json['data']) as List;
       // List<AuditScannLogDataModel> dataList =
       //     list.map((data) => AuditScannLogDataModel.fromJson(data)).toList();
-      log('Test message11');
+      // log('Test message11');
 
       return AuditScannLogModel(
           exception: '',

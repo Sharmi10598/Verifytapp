@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'package:http/http.dart' as http;
 import '../../Constant/ConstantSapValues.dart';
+import '../../Constant/LocalUrl/GetLocalUrl.dart';
 import '../../Model/AuditModel/AuditActionModel.dart';
 
 class GetAuditActionApi {
@@ -12,10 +13,10 @@ class GetAuditActionApi {
     int resCode = 500;
 
     try {
-      log('http://91.203.133.224:92/api/WareSmart/v1/LoadAuditItems/$docEntry/$actionName');
+      log(Url.queryApi + 'WareSmart/v1/LoadAuditItems/$docEntry/$actionName');
       final response = await http.get(
         Uri.parse(
-            "http://91.203.133.224:92/api/WareSmart/v1/LoadAuditItems/26/$actionName"),
+            Url.queryApi + "WareSmart/v1/LoadAuditItems/$docEntry/$actionName"),
         headers: {
           "Content-Type": "application/json",
           "Authorization": 'bearer ' + ConstantValues.token,

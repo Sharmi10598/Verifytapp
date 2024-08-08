@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:verifytapp/Model/ScanPostModel/ScanPostDataaModel.dart';
 import '../../Constant/ConstantSapValues.dart';
 
+import '../../Constant/LocalUrl/GetLocalUrl.dart';
 import '../../Model/BinDetailsModel/ScannLogModel.dart';
 
 class ScannLockedAPiApi {
@@ -44,11 +45,10 @@ class ScannLockedAPiApi {
           // ]
         ));
     try {
-      log('ConstantValues.token::${checklist.length}');
-      log('http://91.203.133.224:92/api/WareSmart/v1/PostAuditScanLog');
+      // log('ConstantValues.token::${checklist.length}');
+      log(Url.queryApi + 'WareSmart/v1/PostAuditScanLog');
       final response = await http.post(
-          Uri.parse(
-              'http://91.203.133.224:92/api/WareSmart/v1/PostAuditScanLog'),
+          Uri.parse(Url.queryApi + 'WareSmart/v1/PostAuditScanLog'),
           headers: {
             "accept": "/",
             "Authorization": 'bearer ' + ConstantValues.token,

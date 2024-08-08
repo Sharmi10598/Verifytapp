@@ -16,6 +16,8 @@ class HelperFunctions {
   static String dbPassword = "dbPassword";
   static String userType = "userType";
   static String whsecode = "whseCode";
+  static String spHost = "spHost";
+  static String Stockurl = "Stockurl";
 
   static Future<bool> saveUserType(String userType1) async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
@@ -117,6 +119,34 @@ class HelperFunctions {
   static Future<String?> getSapUserIDSharedPreference() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     return preferences.getString(sharedPreferenceSapUserID);
+  }
+
+  static Future<bool> saveHostSP(String spHost1) async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    // preferences.reload();
+
+    return await preferences.setString(spHost, spHost1);
+  }
+
+  static Future<bool> saveStockHostSP(String Stocsnapkurl) async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    // preferences.reload();
+
+    return await preferences.setString(Stockurl, Stocsnapkurl);
+  }
+
+  static Future<String?> getStockHostDSP() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    // preferences.reload();
+
+    return preferences.getString(Stockurl);
+  }
+
+  static Future<String?> getHostDSP() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    // preferences.reload();
+
+    return preferences.getString(spHost);
   }
 
   static Future<bool> saveTenetIDSharedPreference(String userEmail) async {

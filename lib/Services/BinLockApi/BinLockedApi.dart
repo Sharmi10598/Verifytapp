@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'package:http/http.dart' as http;
 import '../../Constant/ConstantSapValues.dart';
-import '../../Model/AuditModel/AuditActionModel.dart';
+import '../../Constant/LocalUrl/GetLocalUrl.dart';
 import '../../Model/BinDetailsModel/BinBlockModel.dart';
 
 class BinLockedAPi {
@@ -12,11 +12,10 @@ class BinLockedAPi {
     int resCode = 500;
 
     try {
-      log('ConstantValues.token::${ConstantValues.token}');
-      log('http://91.203.133.224:92/api/WareSmart/v1/PostAuditBinBlock');
+      // log('ConstantValues.token::${ConstantValues.token}');
+      log(Url.queryApi + 'WareSmart/v1/PostAuditBinBlock');
       final response = await http.post(
-          Uri.parse(
-              'http://91.203.133.224:92/api/WareSmart/v1/PostAuditBinBlock'),
+          Uri.parse(Url.queryApi + 'WareSmart/v1/PostAuditBinBlock'),
           headers: {
             "accept": "/",
             "Authorization": 'bearer ' + ConstantValues.token,
@@ -24,21 +23,21 @@ class BinLockedAPi {
           },
           body: jsonEncode([
             {
-              "auditid": 25,
-              "bincode": "B011",
-              "devicecode": "Dc001",
-              "scantime": "2024-07-24T04:55:26.139Z"
+              "auditid": "${binpostDat.auditid}",
+              "bincode": "${binpostDat.bincode}",
+              "devicecode": "${binpostDat.devicecode}",
+              "scantime": "${binpostDat.scantime}"
             }
           ]));
-      log('BinBlock ccc' +
-          jsonEncode([
-            {
-              "auditid": binpostDat.auditid,
-              "bincode": binpostDat.bincode,
-              "devicecode": binpostDat.devicecode,
-              "scantime": binpostDat.scantime
-            }
-          ]));
+      // log('BinBlock ccc' +
+      //     jsonEncode([
+      //       {
+      //         "auditid": binpostDat.auditid,
+      //         "bincode": binpostDat.bincode,
+      //         "devicecode": binpostDat.devicecode,
+      //         "scantime": binpostDat.scantime
+      //       }
+      //     ]));
       // body: jsonEncode([
       //   {
       //     "auditid": 5,
@@ -49,7 +48,7 @@ class BinLockedAPi {
       // ]));
 
       log("BinLocked sts:::" "${response.statusCode.toString()}");
-      // log("BinLocked Res:::" "${response.body.toString()}");
+      log("BinLocked Res:::" "${response.body.toString()}");
 
       resCode = response.statusCode;
       if (response.statusCode == 200) {

@@ -49,11 +49,22 @@ class Config {
     return null;
   }
 
-  Future<bool> haveInterNet() async {
-    final result = await Connectivity().checkConnectivity();
-    final hasInternet = result != ConnectivityResult.none;
-    log('hasInternethasInternet:$hasInternet');
-    return hasInternet;
+  Future<bool?> haveNoInterNet() async {
+    // final result = await Connectivity().checkConnectivity();
+
+    final List<ConnectivityResult> connectivityResult =
+        await (Connectivity().checkConnectivity());
+    bool? hasnoInternet;
+
+    if (connectivityResult.contains(ConnectivityResult.none) == true) {
+      log('VVVVVVVVVVVVVVVVV::::${connectivityResult.contains(ConnectivityResult.none)}');
+      hasnoInternet = true;
+    } else {
+      hasnoInternet = false;
+    }
+    // result != (connectivityResult.contains(ConnectivityResult.none));
+    log('hasnoInternethasnoInternet:$hasnoInternet');
+    return hasnoInternet;
   }
 
   String currentDatepdf() {
@@ -79,7 +90,7 @@ class Config {
     DateTime now = DateTime.now();
 
     String currentDateTime =
-        "${now.year.toString()}-${now.month.toString().padLeft(2, '0')}-${"1".toString().padLeft(2, '0')}T${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:${now.second.toString().padLeft(2, '0')}Z";
+        "${now.year.toString()}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}T${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:${now.second.toString().padLeft(2, '0')}Z";
     print("date: " + currentDateTime.toString());
     return currentDateTime;
   }

@@ -38,25 +38,25 @@ class _AuditingCompletedScreenState extends State<AuditingCompletedScreen> {
               bottom: Screens.padingHeight(context) * 0.07,
             ),
             height: Screens.padingHeight(context) * 0.825,
-            child: context.watch<AuditCtrlProvider>().isLoading == true &&
-                    context.watch<AuditCtrlProvider>().errorMsg.isEmpty &&
-                    context
-                        .watch<AuditCtrlProvider>()
-                        .completedAuditList
-                        .isEmpty
-                ? Center(
-                    child: CircularProgressIndicator(
-                      color: theme.primaryColor,
-                    ),
-                  )
-                : context.watch<AuditCtrlProvider>().isLoading == false &&
-                        context.watch<AuditCtrlProvider>().errorMsg.isEmpty &&
-                        context
-                            .watch<AuditCtrlProvider>()
-                            .completedAuditList
-                            .isEmpty
+            child:
+                //  context.watch<AuditCtrlProvider>().isLoading == true &&
+                //         context.watch<AuditCtrlProvider>().errorMsg.isEmpty &&
+                //         context
+                //             .watch<AuditCtrlProvider>()
+                //             .completedAuditList
+                //             .isEmpty
+                //     ? Center(
+                //         child: CircularProgressIndicator(
+                //           color: theme.primaryColor,
+                //         ),
+                //       )
+                //     :
+                //  context.watch<AuditCtrlProvider>().isLoading == false &&
+                //         context.watch<AuditCtrlProvider>().errorMsg.isEmpty &&
+
+                context.watch<AuditCtrlProvider>().completedAuditList.isEmpty
                     ? Container(
-                        child: Center(child: Text('No Data..')),
+                        child: Center(child: Text('No Data..!!')),
                       )
                     : ListView.builder(
                         padding: EdgeInsets.all(0),
@@ -201,7 +201,7 @@ class _AuditingCompletedScreenState extends State<AuditingCompletedScreen> {
                                                     ?.copyWith(
                                                         color: Colors.grey)),
                                             Text(
-                                                'Audit By ${context.watch<AuditCtrlProvider>().openAuditList[index].whsCode}',
+                                                'Audit By ${context.watch<AuditCtrlProvider>().completedAuditList[index].whsCode}',
                                                 //  ${context.watch<AuditCtrlProvider>().completedAuditList[index].
 
                                                 // }',

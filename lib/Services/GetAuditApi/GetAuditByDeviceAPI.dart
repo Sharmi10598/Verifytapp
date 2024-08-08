@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'package:http/http.dart' as http;
 import '../../Constant/ConstantSapValues.dart';
+import '../../Constant/LocalUrl/GetLocalUrl.dart';
 import '../../Model/AuditModel/AuditByDeviceModel.dart';
 
 class GetAuditByDeviceApi {
@@ -11,10 +12,11 @@ class GetAuditByDeviceApi {
     int resCode = 500;
 
     try {
-      log('ConstantValues.token::${ConstantValues.token}');
+      log('deviceID.deviceID::${deviceID}');
+      log("ConstantValues.token::${ConstantValues.token}");
       final response = await http.get(
-        Uri.parse(
-            "http://91.203.133.224:92/api/WareSmart/v1/GetAuditByDevice?DeviceCode=YUTYY7575775"),
+        Uri.parse(Url.queryApi +
+            "WareSmart/v1/GetAuditByDevice?DeviceCode=$deviceID"),
         headers: {
           "Content-Type": "application/json",
           "Authorization": 'bearer ' + ConstantValues.token,
@@ -22,7 +24,7 @@ class GetAuditByDeviceApi {
       );
 
       log("GetAudit sts:::" "${response.statusCode.toString()}");
-      // log("AuditByDevice Res:::" "${response.body.toString()}");
+      log("AuditByDevice Res:::" "${response.body.toString()}");
 
       resCode = response.statusCode;
       if (response.statusCode == 200) {

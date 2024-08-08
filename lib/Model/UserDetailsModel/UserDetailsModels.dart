@@ -23,7 +23,7 @@ class GetUserModel {
       var list = jsonDecode(json['data']) as List;
       List<GetUserDataModel> dataList =
           list.map((data) => GetUserDataModel.fromJson(data)).toList();
-      log('Test message11');
+      // log('Test message11');
 
       return GetUserModel(
           exception: '',

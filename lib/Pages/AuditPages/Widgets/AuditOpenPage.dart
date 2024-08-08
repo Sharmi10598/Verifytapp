@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
@@ -5,6 +7,7 @@ import 'package:verifytapp/Controllers/AuditController/AuditControllers.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import '../../../Constant/Configuration.dart';
 import '../../../Constant/Screen.dart';
+import '../../../Services/GetAuditApi/SyncExternalStockSnapApi.dart';
 import '../../ItemDetailsPages/ItemDetailsScreen.dart';
 
 class AuditingOpenScreen extends StatefulWidget {
@@ -43,18 +46,25 @@ class _AuditingOpenScreenState extends State<AuditingOpenScreen> {
               bottom: Screens.padingHeight(context) * 0.07,
             ),
             height: Screens.padingHeight(context) * 0.825,
-            child: context.watch<AuditCtrlProvider>().isLoading == true &&
-                    context.watch<AuditCtrlProvider>().errorMsg.isEmpty &&
-                    context.watch<AuditCtrlProvider>().openAuditList.isEmpty
-                ? Center(
-                    child: CircularProgressIndicator(
-                      color: theme.primaryColor,
-                    ),
-                  )
-                : context.watch<AuditCtrlProvider>().isLoading == false &&
-                        context.watch<AuditCtrlProvider>().errorMsg.isEmpty &&
-                        context.watch<AuditCtrlProvider>().openAuditList.isEmpty
-                    ? Container()
+            child:
+                //  context.watch<AuditCtrlProvider>().isLoading == true &&
+                //         context.watch<AuditCtrlProvider>().errorMsg.isEmpty &&
+                //         context.watch<AuditCtrlProvider>().openAuditList.isEmpty
+                //     ? Center(
+                //         child: CircularProgressIndicator(
+                //           color: theme.primaryColor,
+                //         ),
+                //       )
+                //     : context.watch<AuditCtrlProvider>().isLoading == false &&
+                //             context
+                //                 .watch<AuditCtrlProvider>()
+                //                 .errorMsg
+                //                 .isNotEmpty &&
+
+                context.watch<AuditCtrlProvider>().openAuditList.isEmpty
+                    ? Container(
+                        child: Center(child: Text('No Audit Data..!!')),
+                      )
                     : ListView.builder(
                         padding: EdgeInsets.all(0),
                         itemCount: context
@@ -65,13 +75,15 @@ class _AuditingOpenScreenState extends State<AuditingOpenScreen> {
                           return Card(
                             elevation: 0,
                             child: GestureDetector(
-                              onDoubleTap: () {
-                                context
+                              onDoubleTap: () async {
+                                context.read<AuditCtrlProvider>().resetaudit =
+                                    false;
+                                await context
                                     .read<AuditCtrlProvider>()
                                     .fetchOpenDetails(context
                                         .read<AuditCtrlProvider>()
                                         .openAuditList[index]);
-                                showOpenDialog(
+                                await callStockSnapApi(
                                     context,
                                     theme,
                                     context
@@ -79,6 +91,14 @@ class _AuditingOpenScreenState extends State<AuditingOpenScreen> {
                                         .openAuditList[index]
                                         .docEntry,
                                     index);
+                                // showOpenDialog(
+                                // context,
+                                // theme,
+                                // context
+                                //     .read<AuditCtrlProvider>()
+                                //     .openAuditList[index]
+                                //     .docEntry,
+                                // index);
                               },
                               onTap: () {
                                 context.read<AuditCtrlProvider>().clearbtn();
@@ -96,6 +116,7 @@ class _AuditingOpenScreenState extends State<AuditingOpenScreen> {
                                     .fetchOpenDetails(context
                                         .read<AuditCtrlProvider>()
                                         .openAuditList[index]);
+                                // log('messageCCCCCCCCCCC::${context.read<AuditCtrlProvider>().openAuditList[index].deviceCode}');
                                 context
                                     .read<AuditCtrlProvider>()
                                     .callGetBinNumApiApi(
@@ -177,23 +198,8 @@ class _AuditingOpenScreenState extends State<AuditingOpenScreen> {
                                                           AuditCtrlProvider>()
                                                       .openAuditList[index]
                                                       .isStarting ==
-                                                  true
-                                              ? Container(
-                                                  width: Screens.width(context),
-                                                  // height:
-                                                  //     Screens.pad(context),
-                                                  color: Colors.white60,
-                                                  child: Center(
-                                                    child: SpinKitThreeBounce(
-                                                      size:
-                                                          Screens.padingHeight(
-                                                                  context) *
-                                                              0.03,
-                                                      color: theme.primaryColor,
-                                                    ),
-                                                  ),
-                                                )
-                                              : Text(
+                                                  false
+                                              ? Text(
                                                   context
                                                       .watch<
                                                           AuditCtrlProvider>()
@@ -214,6 +220,21 @@ class _AuditingOpenScreenState extends State<AuditingOpenScreen> {
                                                           fontSize: 17,
                                                           fontWeight: FontWeight
                                                               .normal),
+                                                )
+                                              : Container(
+                                                  width: Screens.width(context),
+                                                  // height:
+                                                  //     Screens.pad(context),
+                                                  color: Colors.white60,
+                                                  child: Center(
+                                                    child: SpinKitThreeBounce(
+                                                      size:
+                                                          Screens.padingHeight(
+                                                                  context) *
+                                                              0.03,
+                                                      color: theme.primaryColor,
+                                                    ),
+                                                  ),
                                                 ),
                                           Text(
                                             context
@@ -426,6 +447,29 @@ class _AuditingOpenScreenState extends State<AuditingOpenScreen> {
     ));
   }
 
+  callStockSnapApi(
+      BuildContext context, ThemeData theme, int docEntry, int index) {
+    // showOpenDialog(context, theme, docEntry, index);
+
+    SyncExternalStockApi.getData(
+            context.read<AuditCtrlProvider>().fetchAuditForDetails.whsCode!)
+        .then((value) {
+      if (value.stsCode >= 200 && value.stsCode <= 210) {
+        showOpenDialog(context, theme, docEntry, index);
+      } else if (value.stsCode >= 400 && value.stsCode <= 410) {
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Check Your Internet..!!'),
+          backgroundColor: Colors.red,
+          elevation: 10,
+          behavior: SnackBarBehavior.floating,
+          margin: EdgeInsets.all(5),
+          dismissDirection: DismissDirection.up,
+        ));
+      }
+    });
+  }
+
   showOpenDialog(
       BuildContext context, ThemeData theme, int docEntry, int index) {
     showDialog(
@@ -509,15 +553,18 @@ class _AuditingOpenScreenState extends State<AuditingOpenScreen> {
                           child: ElevatedButton(
                             onPressed: () {
                               setState(() {
-                                String mssgg =
-                                    "Already this audit related data are available in memory. Click 'Continue' to proceed with this data or 'Reset' to start a new process.";
+                                context.read<AuditCtrlProvider>().resetaudit =
+                                    true;
                                 context
                                     .read<AuditCtrlProvider>()
                                     .isClickedStart = false;
+                                String mssgg =
+                                    "Already this audit related data are available in memory. Click 'Continue' to proceed with this data or 'Reset' to start a new process.";
+
                                 context
                                     .read<AuditCtrlProvider>()
                                     .checkTableEmpty(context, theme, mssgg,
-                                        'Start', 26, index);
+                                        'Start', docEntry, index);
                                 // String mssgg2 =
                                 //     'This Operation may take few minutes. Closing the application may interrupt the process. \n Do you want to continue ?';
                                 // context
@@ -571,6 +618,17 @@ class _AuditingOpenScreenState extends State<AuditingOpenScreen> {
                                 SizedBox(
                                   height: Screens.padingHeight(context) * 0.01,
                                 ),
+                                // context.watch<AuditCtrlProvider>().resetaudit ==
+                                //         true
+                                //     ? Center(
+                                //         child: SpinKitThreeBounce(
+                                //           size: Screens.padingHeight(context) *
+                                //               0.03,
+                                //           color: Colors.white,
+                                //         ),
+                                //       )
+                                //     // : Container(),
+                                //     :
                                 Container(
                                   child: Text("Start Audit",
                                       style: theme.textTheme.bodyLarge!

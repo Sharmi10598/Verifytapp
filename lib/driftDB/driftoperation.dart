@@ -196,7 +196,7 @@ class driftoperation {
     // final database = AppDatabase.instance;
     const int batchSize = 5000; // Adjust based on your performance tests
     await database.transaction(() async {
-      log('dataList[j]::::${dataList[0].auditId}');
+      // log('dataList[j]::::${dataList[0].auditId}');
       for (int i = 0; i < dataList.length; i += batchSize) {
         await database.batch((Batch batch) {
           for (int j = i; j < i + batchSize && j < dataList.length; j++) {
@@ -228,7 +228,7 @@ class driftoperation {
     // final database = AppDatabase.instance;
     const int batchSize = 5000; // Adjust based on your performance tests
     await database.transaction(() async {
-      log('dataList[j]::::${dataList[0].areaCode}');
+      // log('dataList[j]::::${dataList[0].areaCode}');
       for (int i = 0; i < dataList.length; i += batchSize) {
         await database.batch((Batch batch) {
           for (int j = i; j < i + batchSize && j < dataList.length; j++) {
@@ -401,6 +401,25 @@ AND (d.WhileOffline = '$whileoffline' or '' = IfNULL (d.WhileOffline , ''))
     }).toList();
   }
 
+  static Future<List<BinMasterData>> checkBinMasterdata(
+      AppDatabase database, String bincode) async {
+    final result = await database
+        .customSelect("Select * from driftbinmaster where Bincode='$bincode'")
+        .get();
+    log("driftBinMastercheck resultresult::${result.length}");
+    return result.map((row) {
+      return BinMasterData(
+        areaCode: row.read<String?>('AreaCode') ?? '',
+        auditId: row.read<int?>('Auditid') ?? 0,
+        binCode: row.read<String?>('Bincode') ?? '',
+        rackCode: row.read<String?>('RackCode') ?? '',
+        status: row.read<int?>('Status') ?? 0,
+        whsCode: row.read<String?>('Whscode') ?? '',
+        zoneCode: row.read<String?>('ZoneCode') ?? '',
+      );
+    }).toList();
+  }
+
   static Future<List<DispListData>> getDisplistproduct(
       AppDatabase database) async {
     final result =
@@ -466,6 +485,29 @@ AND (d.WhileOffline = '$whileoffline' or '' = IfNULL (d.WhileOffline , ''))
     return result;
   }
 
+//delete full table
+  static Future deleteBinListItem(AppDatabase database) async {
+    // return (delete(items)..where((tbl) => tbl.id.equals(id))).go();
+    var result = database.customStatement("delete from driftbinmaster");
+    // log("fgfff::" + result.toString());
+    return result;
+  }
+
+  static Future deleteListItem(AppDatabase database) async {
+    // return (delete(items)..where((tbl) => tbl.id.equals(id))).go();
+    var result = database.customStatement("delete from driftstocksnapmaster");
+    // log("fgfff::" + result.toString());
+
+    return result;
+  }
+
+  static Future deletHeaderItem(AppDatabase database) async {
+    // return (delete(items)..where((tbl) => tbl.id.equals(id))).go();
+    var result = database.customStatement("delete from drifitemmaster");
+    // log("fgfff::" + result.toString());
+    return result;
+  }
+
   static Future<List<LineData>> ckeckLineproduct(
     AppDatabase database,
     int id,
@@ -485,6 +527,7 @@ AND (d.WhileOffline = '$whileoffline' or '' = IfNULL (d.WhileOffline , ''))
         itemCode: row.read<String?>('ItemCode') ?? '',
         quantity: row.read<double?>('Quantity') ?? 0.0,
         scheduleId: row.read<int?>('ScheduleId') ?? 0,
+        altSerialBatch: row.read<String?>('AltSerialBatch') ?? '',
         serailBatch: row.read<String?>('SerailBatch') ?? '',
         inDate: row.read<String?>('InDate') ?? '',
         expDate: row.read<String?>('ExpDate') ?? '',
@@ -519,6 +562,7 @@ AND (d.WhileOffline = '$whileoffline' or '' = IfNULL (d.WhileOffline , ''))
         updatedBy: row.read<String?>('UpdatedBy') ?? '',
         updatedDatetime: row.read<String?>('UpdatedDatetime') ?? '',
         whsCode: row.read<String?>('WhsCode') ?? '',
+        altSerialBatch: row.read<String?>('AltSerialBatch') ?? '',
       );
     }).toList();
   }
@@ -527,7 +571,7 @@ AND (d.WhileOffline = '$whileoffline' or '' = IfNULL (d.WhileOffline , ''))
       AppDatabase database) async {
     final result = await database
         .customSelect(
-            "SELECT BinCode, ItemCode, SerailBatch from driftstocksnapmaster limit(10)")
+            "SELECT BinCode, ItemCode, SerailBatch, AltSerialBatch from driftstocksnapmaster limit(10)")
         .get();
     return result.map((row) {
       // log("linemaster limitresult::${row.read<String?>('SerailBatch')}::${row.read<String?>('ItemCode')}:: ${row.read<String?>('BinCode')}");
@@ -535,6 +579,7 @@ AND (d.WhileOffline = '$whileoffline' or '' = IfNULL (d.WhileOffline , ''))
       return LineData(
         binCode: row.read<String?>('BinCode') ?? '',
         serailBatch: row.read<String?>('SerailBatch') ?? '',
+        altSerialBatch: row.read<String?>('AltSerialBatch') ?? '',
         itemCode: row.read<String?>('ItemCode') ?? '',
       );
     }).toList();
@@ -573,6 +618,7 @@ AND (d.WhileOffline = '$whileoffline' or '' = IfNULL (d.WhileOffline , ''))
         quantity: row.read<double?>('Quantity') ?? 0.0,
         scheduleId: row.read<int?>('ScheduleId') ?? 0,
         serailBatch: row.read<String?>('SerailBatch') ?? '',
+        altSerialBatch: row.read<String?>('AltSerialBatch') ?? '',
         traceid: row.read<String?>('traceid') ?? '',
         uoM: row.read<String?>('UoM') ?? '',
         updatedBy: row.read<String?>('UpdatedBy') ?? '',
@@ -590,12 +636,9 @@ AND (d.WhileOffline = '$whileoffline' or '' = IfNULL (d.WhileOffline , ''))
     String columnVal,
     String columnVal2,
   ) async {
-    // log('message1::$columnVal');
-    // log('message2::$columnVal2');
-
     final result = await database
         .customSelect(
-            "SELECT * from driftstocksnapmaster where $columnVal='$columnVal2'")
+            "SELECT * from driftstocksnapmaster where SerailBatch='$columnVal2' or AltSerialBatch='$columnVal2'")
         .get();
     log("lineSerColumn resultresult::${result.length}");
     return result.map((row) {
@@ -611,6 +654,7 @@ AND (d.WhileOffline = '$whileoffline' or '' = IfNULL (d.WhileOffline , ''))
         itemCode: row.read<String?>('ItemCode') ?? '',
         quantity: row.read<double?>('Quantity') ?? 0.0,
         scheduleId: row.read<int?>('ScheduleId') ?? 0,
+        altSerialBatch: row.read<String?>('AltSerialBatch') ?? '',
         serailBatch: row.read<String?>('SerailBatch') ?? '',
         traceid: row.read<String?>('traceid') ?? '',
         uoM: row.read<String?>('UoM') ?? '',
