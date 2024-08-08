@@ -355,30 +355,34 @@ class _HomePageState extends State<HomePage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Icon(
-                                Icons.badge_rounded,
-                                color: Colors.grey,
+                          // Row(
+                          //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          //   children: [
+                          // const Icon(
+                          //   Icons.badge_rounded,
+                          //   color: Colors.grey,
+                          // ),
+                          Center(
+                            child: Text(
+                              'New Orders',
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
                               ),
-                              Text(
-                                '4',
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                    color: Colors.cyan,
-                                    fontSize: 17,
-                                    fontWeight: FontWeight.normal),
-                              )
-                            ],
+                            ),
                           ),
+                          Center(
+                            child: Text(
+                              '4',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: Colors.cyan,
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.normal),
+                            ),
+                          ),
+                          //   ],
+                          // ),
                           SizedBox(
                             height: Screens.bodyheight(context) * 0.01,
-                          ),
-                          Text(
-                            'New Orders',
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
                           ),
                         ],
                       ),
@@ -399,30 +403,34 @@ class _HomePageState extends State<HomePage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Icon(
-                                Icons.delete,
-                                color: Colors.grey,
+                          // Row(
+                          //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          //   children: [
+                          // const Icon(
+                          //   Icons.delete,
+                          //   color: Colors.grey,
+                          // ),
+                          Center(
+                            child: Text(
+                              'Empty Bins',
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
                               ),
-                              Text(
-                                '32',
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                    color: Colors.cyan,
-                                    fontSize: 17,
-                                    fontWeight: FontWeight.normal),
-                              )
-                            ],
+                            ),
                           ),
+                          Center(
+                            child: Text(
+                              '32',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: Colors.cyan,
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.normal),
+                            ),
+                          ),
+                          //   ],
+                          // ),
                           SizedBox(
                             height: Screens.bodyheight(context) * 0.01,
-                          ),
-                          Text(
-                            'Empty Bins',
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
                           ),
                         ],
                       ),
@@ -443,30 +451,34 @@ class _HomePageState extends State<HomePage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Icon(
-                                Icons.shopping_cart,
-                                color: Colors.grey,
+                          // Row(
+                          //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          //   children: [
+                          // const Icon(
+                          //   Icons.shopping_cart,
+                          //   color: Colors.grey,
+                          // ),
+                          Center(
+                            child: Text(
+                              'Putaway',
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
                               ),
-                              Text(
-                                '30',
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                    color: Colors.cyan,
-                                    fontSize: 17,
-                                    fontWeight: FontWeight.normal),
-                              )
-                            ],
+                            ),
                           ),
+                          Center(
+                            child: Text(
+                              '30',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: Colors.cyan,
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.normal),
+                            ),
+                          ),
+                          //   ],
+                          // ),
                           SizedBox(
                             height: Screens.bodyheight(context) * 0.01,
-                          ),
-                          Text(
-                            'Putaway',
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
                           ),
                         ],
                       ),

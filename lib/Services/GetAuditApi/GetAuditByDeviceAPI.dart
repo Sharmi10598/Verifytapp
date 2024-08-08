@@ -24,7 +24,7 @@ class GetAuditByDeviceApi {
       );
 
       log("GetAudit sts:::" "${response.statusCode.toString()}");
-      log("AuditByDevice Res:::" "${response.body.toString()}");
+      // log("AuditByDevice Res:::" "${response.body.toString()}");
 
       resCode = response.statusCode;
       if (response.statusCode == 200) {

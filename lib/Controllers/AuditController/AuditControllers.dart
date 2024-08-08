@@ -46,9 +46,7 @@ class AuditCtrlProvider extends ChangeNotifier {
 
   init(BuildContext context, ThemeData theme) async {
     final database = (await AppDatabase.initialize())!;
-    // callDispValApi();
     audioPlayer = AudioPlayer();
-
     Database db = (await DBHelper.getInstance())!;
     clearAllData();
     await getAuditBydeviceData();
@@ -124,6 +122,9 @@ class AuditCtrlProvider extends ChangeNotifier {
   bool disabledBtn = false;
   getAuditBydeviceData() async {
     getAuditList = [];
+    openAuditList = [];
+    completedAuditList = [];
+    upcomingtAuditList = [];
     errorMsg = '';
     Database db = (await DBHelper.getInstance())!;
     List<Map<String, Object?>> result2 =
@@ -2076,10 +2077,12 @@ class AuditCtrlProvider extends ChangeNotifier {
 
   splitAuditJob() {
     log('getAuditListgetAuditList::${getAuditList.length}');
+    openAuditList = [];
+    completedAuditList = [];
+    upcomingtAuditList = [];
     errorMsg = '';
     if (getAuditList.isNotEmpty) {
       for (var i = 0; i < getAuditList.length; i++) {
-        log('NNNNNNNNNNNNNNNNN::${getAuditList[i].status}');
         // log("getAuditList[i].status::${getAuditList[i].status}");
         if (getAuditList[i].status == 'Open' ||
             getAuditList[i].status == 'Starting' ||
@@ -2172,7 +2175,6 @@ class AuditCtrlProvider extends ChangeNotifier {
         }
       }
     }
-    log('FFFFFFFFFFFFFFFFFFF:${completedAuditList.length}');
   }
 
   // auditDataMethod() {

@@ -28,7 +28,7 @@ class DBOperation {
     List<Map<String, Object?>> result = await db.rawQuery('''
     select * from $auditDataModelTableDB
      ''');
-    log("insertAuditBy result:: ${result}");
+    // log("insertAuditBy result:: ${result}");
   }
 
   static Future<List<Map<String, Object?>>> getAuditByDervice(
